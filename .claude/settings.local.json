@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(python -c \":*)",
+      "Bash(python:*)",
+      "Bash(vercel --version)",
+      "Bash(vercel whoami:*)",
+      "Bash(npm install:*)",
+      "Bash(timeout 30 npx turbo dev --filter=web)",
+      "Bash(npm --version)",
+      "Bash(timeout 35 npx turbo dev --filter=web)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npx shadcn@latest init --defaults)",
+      "Bash(npx shadcn@latest add button card table badge tabs separator sheet dialog dropdown-menu input label textarea tooltip scroll-area slider select --overwrite)",
+      "Bash(npx tsc:*)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(pkill -f \"turbo dev\")"
+    ]
+  }
+}
