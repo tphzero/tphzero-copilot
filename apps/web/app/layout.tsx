@@ -1,9 +1,11 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "TPHZero Copilot",
-  description: "Bioremediation monitoring and analysis",
+  title: 'TPHZero Copilot',
+  description: 'Monitoreo inteligente de biorremediación de suelos',
 };
 
 export default function RootLayout({
@@ -12,8 +14,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="es" className={`dark ${GeistSans.variable} ${GeistMono.variable}`}>
+      <body className="font-sans antialiased">
+        {children}
+      </body>
     </html>
   );
 }
