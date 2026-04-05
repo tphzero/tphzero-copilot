@@ -14,33 +14,25 @@ import { OverviewCharts } from '@/components/dashboard/overview-charts';
 import { TPHTimeline } from '@/components/charts/tph-timeline';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { mapRow } from '@/lib/data/map-row';
-
-interface DatasetSummary {
-  id: string;
-}
+import { useActiveDataset } from '@/lib/context/dataset-context';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { activeDataset } = useActiveDataset();
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!activeDataset) {
+      router.replace('/');
+      return;
+    }
+
     let active = true;
 
     async function loadDashboard() {
       try {
-        const datasetsResponse = await fetch('/api/data');
-        const datasetsPayload = (await datasetsResponse.json()) as {
-          datasets?: DatasetSummary[];
-        };
-
-        const latestDataset = datasetsPayload.datasets?.[0];
-        if (!latestDataset) {
-          router.replace('/');
-          return;
-        }
-
-        const detailResponse = await fetch(`/api/data/${latestDataset.id}`);
+        const detailResponse = await fetch(`/api/data/${activeDataset.id}`);
         const detailPayload = (await detailResponse.json()) as {
           measurements?: Record<string, unknown>[];
         };
@@ -59,7 +51,7 @@ export default function DashboardPage() {
     return () => {
       active = false;
     };
-  }, [router]);
+  }, [activeDataset, router]);
 
   if (loading) {
     return (

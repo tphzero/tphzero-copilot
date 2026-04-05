@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { use } from 'react';
 import type { Measurement } from '@tphzero/domain';
 import { classifyBiopilaState, reductionPercent } from '@tphzero/domain';
@@ -17,36 +18,30 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
-interface DatasetSummary {
-  id: string;
-}
+import { useActiveDataset } from '@/lib/context/dataset-context';
 
 export default function BiopilaDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const router = useRouter();
+  const { activeDataset } = useActiveDataset();
   const { id } = use(params);
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!activeDataset) {
+      router.replace('/');
+      return;
+    }
+
     let active = true;
 
     async function loadBiopila() {
       try {
-        const datasetsResponse = await fetch('/api/data');
-        const datasetsPayload = (await datasetsResponse.json()) as {
-          datasets?: DatasetSummary[];
-        };
-
-        const latestDataset = datasetsPayload.datasets?.[0];
-        if (!latestDataset) {
-          return;
-        }
-
-        const detailResponse = await fetch(`/api/data/${latestDataset.id}`);
+        const detailResponse = await fetch(`/api/data/${activeDataset.id}`);
         const detailPayload = (await detailResponse.json()) as {
           measurements?: Record<string, unknown>[];
         };
@@ -69,7 +64,7 @@ export default function BiopilaDetailPage({
     return () => {
       active = false;
     };
-  }, [id]);
+  }, [activeDataset, id, router]);
 
   if (loading) {
     return (

@@ -11,7 +11,7 @@ import {
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
-  { href: '/', label: 'Inicio', icon: Upload },
+  { href: '/', label: 'Carga de Datos', icon: Upload },
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/chat', label: 'Chat IA', icon: MessageSquare },
   { href: '/simulator', label: 'Simulador', icon: SlidersHorizontal },
