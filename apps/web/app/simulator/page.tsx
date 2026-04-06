@@ -19,6 +19,7 @@ import { ActiveModelPanel } from '@/components/simulator/active-model-panel';
 import { ComparisonChart } from '@/components/simulator/comparison-chart';
 import { SimulatorExplanation } from '@/components/simulator/simulator-explanation';
 import { SimulatorKineticsPanel } from '@/components/simulator/simulator-kinetics-panel';
+import { LatexMarkdown } from '@/components/simulator/latex-markdown';
 import { VariableSliders } from '@/components/simulator/variable-sliders';
 import { simulateScenario } from '@/lib/models/simulator';
 import {
@@ -257,12 +258,15 @@ export default function SimulatorPage() {
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-2xl font-bold">Simulador What-If</h1>
-        <p className="text-sm text-zinc-400">
-          Modifica variables operativas y observa como cambia la proyeccion de TPH. La linea base
-          usa solo el historial; el escenario simulado escala la tasa con factores (Q10, Monod,
-          humedad, volteo) respecto a la ultima medicion. Abre &quot;Como se calcula el escenario
-          simulado&quot; para el detalle y limitaciones.
-        </p>
+        <LatexMarkdown
+          className="text-sm text-zinc-400"
+          content={
+            'Modifica variables operativas y observa como cambia la proyeccion de $\\mathrm{TPH}$. ' +
+            'La **linea base** usa solo el historial ($k$ desde $\\ln(\\mathrm{TPH}/\\mathrm{TPH}_0)$ vs $t$). ' +
+            'El **escenario simulado** escala la tasa con $M = \\prod_i f_i$ (regla $Q_{10}$, Monod, humedad, volteo) ' +
+            'respecto a la ultima medicion. Abre *Como se calcula el escenario simulado* para el detalle y limitaciones.'
+          }
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -343,10 +347,10 @@ export default function SimulatorPage() {
                   <Card className="border-zinc-800 bg-zinc-900">
                     <CardHeader>
                       <CardTitle>Comparacion: linea base vs. simulado</CardTitle>
-                      <p className="text-xs text-zinc-500">
-                        Horizonte de proyeccion: {result.horizonDays} dias (modelo{' '}
-                        {result.modelId}).
-                      </p>
+                      <LatexMarkdown
+                        className="text-xs text-zinc-500"
+                        content={`**Horizonte extra de proyeccion:** $H = ${result.horizonDays}~\mathrm{d}$ (variante \`${result.modelId}\`).`}
+                      />
                     </CardHeader>
                     <CardContent>
                       <ComparisonChart result={result} />
@@ -356,29 +360,39 @@ export default function SimulatorPage() {
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <Card className="border-zinc-800 bg-zinc-900">
                       <CardContent className="pt-6">
-                        <p className="text-xs text-zinc-500">Ventaja maxima en reduccion</p>
+                        <LatexMarkdown
+                          className="text-xs text-zinc-500"
+                          content="**Ventaja maxima en reduccion** (respecto a $\\mathrm{TPH}_0$)"
+                        />
                         <p className="mt-1 font-mono text-2xl font-bold text-emerald-400">
                           {result.deltaReductionPct >= 0 ? '+' : ''}
                           {result.deltaReductionPct.toFixed(1)} pp
                         </p>
-                        <p className="mt-2 text-xs leading-snug text-zinc-600">
-                          Maximo a lo largo de la curva (pp del TPH inicial): donde el simulado
-                          mas se separa de la base.
-                        </p>
+                        <LatexMarkdown
+                          className="mt-2 text-xs leading-snug text-zinc-600"
+                          content={
+                            'Maximo a lo largo de la curva en **puntos porcentuales** del $\\mathrm{TPH}$ inicial; donde la proyeccion simulada mas se separa de la base.'
+                          }
+                        />
                       </CardContent>
                     </Card>
                     <Card className="border-zinc-800 bg-zinc-900">
                       <CardContent className="pt-6">
-                        <p className="text-xs text-zinc-500">Tiempo ahorrado (estimado)</p>
+                        <LatexMarkdown
+                          className="text-xs text-zinc-500"
+                          content="**Tiempo ahorrado** (estimado, $\\mathrm{d}$)"
+                        />
                         <p className="mt-1 font-mono text-2xl font-bold text-blue-400">
                           {result.estimatedTimeSavedDays !== null
-                            ? `${result.estimatedTimeSavedDays} dias`
+                            ? `${result.estimatedTimeSavedDays} d`
                             : 'N/A'}
                         </p>
-                        <p className="mt-2 text-xs leading-snug text-zinc-600">
-                          Dias antes de alcanzar el 90% de reduccion de TPH respecto al inicial
-                          (misma meta que el modelo), comparando curvas proyectadas.
-                        </p>
+                        <LatexMarkdown
+                          className="mt-2 text-xs leading-snug text-zinc-600"
+                          content={
+                            '$\\Delta t$ hasta alcanzar el $90\\%$ de reduccion de $\\mathrm{TPH}$ respecto al inicial (meta del modelo), comparando curvas proyectadas.'
+                          }
+                        />
                       </CardContent>
                     </Card>
                   </div>

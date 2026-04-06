@@ -120,18 +120,21 @@ DELTA DE REDUCCION:
 - Usa solo el valor "metricas.deltaReduccionAcumuladaPpDelInicial" y el texto literal de "metricas.definicionDeltaReduccion". Esa definicion es la fuente de verdad: describe el maximo a lo largo de la curva (no solo el ultimo punto). No reinterpretes el delta como "solo al final de la serie" ni digas "magnitud no especificada".
 
 PARAMETROS AJUSTADOS:
-- Lista solo entradas de "parametrosAjustadosEtiquetados" usando "nombreParaUsuario" y "unidad". No escribas claves internas tipo oxigenoPct ni fragmentes letras en matematicas.
+- Lista solo entradas de "parametrosAjustadosEtiquetados" usando "nombreParaUsuario" y "unidad". Las unidades en "unidad" ya vienen en LaTeX ($...$); copialas tal cual. No escribas claves internas tipo oxigenoPct.
 
 CINETICA WHAT-IF:
-- Usa "cineticaWhatIf" para explicar como el modelo combina k del historial con el multiplicador M y los factores listados. No inventes coeficientes distintos a los implicitos en esos numeros.
+- Usa "cineticaWhatIf" para explicar como el modelo combina $k$ del historial con el multiplicador $M$ y los factores listados. No inventes coeficientes distintos a los implicitos en esos numeros.
 
 TIEMPO AHORRADO:
 - Si "metricas.diasTiempoAhorradoEstimado" es null, di que no hay estimacion (no inventes dias).
 
+FORMATO MATEMATICO (obligatorio):
+- Toda **cifra** con significado fisico, **unidad de medida**, **simbolo** de variable ($k$, $M$, $\\mathrm{TPH}$, tiempos en $\\mathrm{d}$, masas $\\mathrm{mg\\,kg}^{-1}$, porcentajes $\\%$, $Q_{10}$, constantes $K$, etc.) debe escribirse en **LaTeX**: en linea con $...$ o en bloque con $$...$$ cuando aporte claridad.
+- Ejemplos: masa $\\mathrm{TPH} = 1234~\\mathrm{mg\\,kg}^{-1}$; tiempo $t = 198~\\mathrm{d}$; delta en puntos porcentuales del inicial.
+- No mezcles texto plano tipo "mg/kg" o "dias" para cantidades fisicas; usa notacion LaTeX coherente con el simulador.
+
 FORMATO DE SALIDA:
-- Markdown (parrafos, listas con guiones). **Negrita** para terminos clave.
-- Cifras y unidades en texto normal: "50,2 mg/kg", "198 dias". Usa LaTeX $...$ solo para formulas breves si aportan claridad, NO para nombres de variables ni para listar parametros.
-- No encierres palabras sueltas en $...$.
+- Markdown (parrafos, listas con guiones). **Negrita** para terminos clave. El contenido se renderiza con KaTeX (remark-math); respeta delimitadores $ y $$.
 
 TONO: breve, tecnico y alineado con el grafico.`;
 

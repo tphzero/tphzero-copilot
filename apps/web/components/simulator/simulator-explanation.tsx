@@ -5,6 +5,7 @@ import { Loader2, RefreshCw } from 'lucide-react';
 import type { SimulationResult } from '@tphzero/domain';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { LatexMarkdown } from '@/components/simulator/latex-markdown';
 import { RichExplanation } from '@/components/simulator/rich-explanation';
 import type { SimulatorModelMeta } from '@/lib/models/simulator-models';
 
@@ -27,6 +28,9 @@ interface SimulatorExplanationProps {
   explanationStale: boolean;
   onGenerationSuccess: () => void;
 }
+
+const EXPLAIN_INTRO =
+  'La explicacion usa **solo** los numeros del simulador y el modelo indicado ($k$, $M$, series de $\\mathrm{TPH}$); **no** sustituye mediciones ni garantiza resultados en campo.';
 
 export function SimulatorExplanation({
   datasetId,
@@ -80,10 +84,7 @@ export function SimulatorExplanation({
     <Card className="border-zinc-800 bg-zinc-900">
       <CardHeader>
         <CardTitle className="text-base">Interpretacion (IA)</CardTitle>
-        <p className="text-xs text-zinc-500">
-          La explicacion usa solo los numeros del simulador y el modelo indicado; no sustituye
-          mediciones ni garantiza resultados.
-        </p>
+        <LatexMarkdown className="text-xs text-zinc-500 [&_p]:text-xs" content={EXPLAIN_INTRO} />
       </CardHeader>
       <CardContent className="space-y-3">
         <Button

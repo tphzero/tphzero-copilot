@@ -5,16 +5,26 @@ export interface SimulatorModelMeta {
   name: string;
   /** Formula principal en notacion LaTeX (KaTeX), p. ej. exponencial. */
   equationLatex: string;
-  /** Texto aclaratorio tras la formula (texto plano). */
+  /** Texto aclaratorio (Markdown + LaTeX $...$ / $$...$$). */
   equationCaption: string;
+  /** Markdown + LaTeX. */
   hypothesis: string;
+  /** Markdown + LaTeX. */
   limitations: string;
   /** Horizonte extra de proyeccion respecto al ultimo dia observado (dias). */
   horizonDays: number;
 }
 
+/** Texto de ecuacion compartido; unidades y simbolos en LaTeX. */
 const KINETICS_CAPTION =
-  'Linea base: k (1/d) se ajusta por regresion sobre ln(TPH/TPH0) vs t con el historial. Escenario simulado: se usa la misma TPH0 y el mismo k, pero la tasa efectiva es k M, con M = producto de factores adimensionales que comparan los sliders con la ultima medicion: temperatura (ley Q10 respecto a la referencia), humedad (campana alrededor de un optimo), oxigeno y nutrientes N-P-K (cinética tipo Monod / limitacion), y volteo (proxy de aeracion-mezcla con intervalos entre volteos). Los coeficientes (Q10, K de Monod, forma de humedad) son valores a priori calibrables; no sustituyen un ensayo de campo.';
+  '**Linea base:** el coeficiente $k$ con unidades $\\mathrm{d}^{-1}$ se ajusta por regresion sobre ' +
+  '$\\ln(\\mathrm{TPH}/\\mathrm{TPH}_0)$ frente al tiempo $t$ (en $\\mathrm{d}$) con el historial.\n\n' +
+  '**Escenario simulado:** se usa la misma $\\mathrm{TPH}_0$ y el mismo $k$, pero la tasa efectiva es ' +
+  '$k \\cdot M$, con $M$ igual al **producto** de factores adimensionales que comparan los sliders con la ' +
+  'ultima medicion: temperatura (ley $Q_{10}$ respecto a la referencia), humedad (campana alrededor de un ' +
+  'optimo), oxigeno y nutrientes N, P, K (cinetica tipo Monod / limitacion), y volteo (proxy de ' +
+  'aeracion-mezcla con intervalos entre volteos en $\\mathrm{d}$). Los coeficientes ($Q_{10}$, $K$ de Monod, ' +
+  'forma de humedad) son valores **a priori** calibrables; no sustituyen un ensayo de campo.';
 
 export const SIMULATOR_MODELS: SimulatorModelMeta[] = [
   {
@@ -24,9 +34,9 @@ export const SIMULATOR_MODELS: SimulatorModelMeta[] = [
       String.raw`\mathrm{TPH}(t) = \mathrm{TPH}_0 \, e^{-k M t}, \quad M = \prod_i f_i \quad (\mathrm{mg/kg})`,
     equationCaption: KINETICS_CAPTION,
     hypothesis:
-      'Cinética de primer orden en TPH en el historial; los factores f_i escalan la tasa segun variables operativas respecto a la ultima medicion (formulacion habitual en microbiologia de suelos y limitacion por sustrato).',
+      'Cinetica de **primer orden** en $\\mathrm{TPH}$ en el historial; los factores $f_i$ escalan la tasa segun variables operativas respecto a la ultima medicion (formulacion habitual en microbiologia de suelos y limitacion por sustrato).',
     limitations:
-      'Horizonte corto para limitar extrapolacion; M es un modelo compacto: no captura todos los fenomenos (metabolitos, toxicidad, heterogeneidad espacial).',
+      'Horizonte corto ($H = 180~\\mathrm{d}$ extra) para limitar extrapolacion; $M$ es un modelo compacto: no captura todos los fenomenos (metabolitos, toxicidad, heterogeneidad espacial).',
     horizonDays: 180,
   },
   {
@@ -36,7 +46,7 @@ export const SIMULATOR_MODELS: SimulatorModelMeta[] = [
       String.raw`\mathrm{TPH}(t) = \mathrm{TPH}_0 \, e^{-k M t}, \quad M = \prod_i f_i \quad (\mathrm{mg/kg})`,
     equationCaption: KINETICS_CAPTION,
     hypothesis:
-      'La trayectoria observada es compatible con una tasa efectiva constante en el tramo ajustado; M modula esa tasa segun hipotesis de Q10, Monod y disponibilidad de agua.',
+      'La trayectoria observada es compatible con una tasa efectiva **constante** en el tramo ajustado; $M$ modula esa tasa segun hipotesis de $Q_{10}$, Monod y disponibilidad de agua.',
     limitations:
       'Asume que el historial representa el regimen futuro; no garantiza plazos ni reemplaza validacion experimental.',
     horizonDays: 360,
@@ -48,9 +58,9 @@ export const SIMULATOR_MODELS: SimulatorModelMeta[] = [
       String.raw`\mathrm{TPH}(t) = \mathrm{TPH}_0 \, e^{-k M t}, \quad M = \prod_i f_i \quad (\mathrm{mg/kg})`,
     equationCaption: KINETICS_CAPTION,
     hypothesis:
-      'Con historial suficiente, la misma forma exponencial puede proyectarse mas alla; M sigue interpretandose como escenario operativo frente a la ultima medicion.',
+      'Con historial suficiente, la misma forma exponencial puede proyectarse mas alla; $M$ sigue interpretandose como escenario operativo frente a la ultima medicion.',
     limitations:
-      'A mayor horizonte, mayor incertidumbre; la sensibilidad a sliders no implica precision absoluta del tiempo de remediacion.',
+      'A mayor horizonte ($H = 540~\\mathrm{d}$ extra), mayor incertidumbre; la sensibilidad a sliders no implica precision absoluta del tiempo de remediacion.',
     horizonDays: 540,
   },
   {
@@ -58,11 +68,11 @@ export const SIMULATOR_MODELS: SimulatorModelMeta[] = [
     name: 'Horizonte personalizado',
     equationLatex:
       String.raw`\mathrm{TPH}(t) = \mathrm{TPH}_0 \, e^{-k M t}, \quad M = \prod_i f_i \quad (\mathrm{mg/kg})`,
-    equationCaption: `${KINETICS_CAPTION} El horizonte de dias de proyeccion se fija explicitamente cuando no coincide con un modelo predefinido.`,
+    equationCaption: `${KINETICS_CAPTION} El horizonte de dias de proyeccion $H$ se fija explicitamente cuando no coincide con un modelo predefinido.`,
     hypothesis:
-      'Misma forma que los demas modelos; solo cambia el horizonte numerico de la rejilla temporal.',
+      'Misma forma que los demas modelos; solo cambia el horizonte numerico $H$ ($\\mathrm{d}$) de la rejilla temporal.',
     limitations:
-      'Revisar coherencia entre horizonte elegido, datos disponibles y uso de la simulacion.',
+      'Revisar coherencia entre horizonte elegido $H$, datos disponibles y uso de la simulacion.',
     horizonDays: 360,
   },
 ];
@@ -114,6 +124,7 @@ export function getSimulatorModelById(id: string): SimulatorModelMeta | undefine
 /**
  * Misma entrada -> mismo modelo recomendado (reglas fijas; ver comentarios).
  * Criterios: numero de puntos y cobertura temporal (dias entre primera y ultima medicion).
+ * Textos con LaTeX ($...$) para unidades y horizontes.
  */
 export function recommendSimulatorModel(
   measurements: Measurement[]
@@ -122,7 +133,8 @@ export function recommendSimulatorModel(
   if (sorted.length < 2) {
     return {
       modelId: 'standard-360',
-      reason: 'Menos de dos mediciones: se usa el horizonte estandar por defecto.',
+      reason:
+        'Menos de dos mediciones: se usa el horizonte estandar ($H = 360~\\mathrm{d}$ extra) por defecto.',
     };
   }
 
@@ -133,7 +145,7 @@ export function recommendSimulatorModel(
     return {
       modelId: 'conservative-180',
       reason:
-        'Pocas mediciones o cobertura temporal corta: se recomienda un horizonte reducido para limitar extrapolacion.',
+        'Pocas mediciones o cobertura temporal corta ($\\Delta t < 45~\\mathrm{d}$): se recomienda horizonte reducido ($H = 180~\\mathrm{d}$ extra) para limitar extrapolacion.',
     };
   }
 
@@ -141,13 +153,13 @@ export function recommendSimulatorModel(
     return {
       modelId: 'extended-540',
       reason:
-        'Historial amplio y buena cobertura temporal: se puede proyectar con un horizonte extendido.',
+        'Historial amplio ($n \\ge 8$) y buena cobertura ($\\Delta t \\ge 120~\\mathrm{d}$): se puede proyectar con horizonte extendido ($H = 540~\\mathrm{d}$ extra).',
     };
   }
 
   return {
     modelId: 'standard-360',
-    reason: 'Historial adecuado para el horizonte de prediccion estandar.',
+    reason: 'Historial adecuado para el horizonte de prediccion estandar ($H = 360~\\mathrm{d}$ extra).',
   };
 }
 

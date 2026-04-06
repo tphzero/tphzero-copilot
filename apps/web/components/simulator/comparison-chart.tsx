@@ -23,6 +23,7 @@ import {
   filterSeriesByTimePreset,
   type TimeRangePreset,
 } from '@/lib/models/simulator-chart-range';
+import { LatexMarkdown } from '@/components/simulator/latex-markdown';
 
 function formatTooltipValue(
   value: number | string | readonly (number | string)[] | undefined,
@@ -30,7 +31,8 @@ function formatTooltipValue(
 ) {
   const rawValue = Array.isArray(value) ? value[0] : value;
   const numericValue = typeof rawValue === 'number' ? rawValue : Number(rawValue ?? 0);
-  return [`${Math.round(numericValue).toLocaleString('es')} mg/kg`, label] as const;
+  const n = Math.round(numericValue).toLocaleString('es');
+  return [`${n} (TPH, mg/kg)`, label] as const;
 }
 
 function formatYTick(value: number) {
@@ -138,7 +140,7 @@ export function ComparisonChart({ result }: { result: SimulationResult }) {
               tickMargin={8}
               height={52}
               label={{
-                value: 'Tiempo (dias desde inicio)',
+                value: 't (d)',
                 position: 'insideBottom',
                 fill: '#a1a1aa',
                 offset: -4,
@@ -149,7 +151,7 @@ export function ComparisonChart({ result }: { result: SimulationResult }) {
               fontSize={12}
               tickFormatter={formatYTick}
               label={{
-                value: 'TPH (mg/kg)',
+                value: 'TPH',
                 angle: -90,
                 position: 'insideLeft',
                 fill: '#71717a',
@@ -161,7 +163,7 @@ export function ComparisonChart({ result }: { result: SimulationResult }) {
                 border: '1px solid #3f3f46',
                 borderRadius: '8px',
               }}
-              labelFormatter={(value) => `Dia ${value}`}
+              labelFormatter={(value) => `t = ${value} d`}
               formatter={(value, name) => formatTooltipValue(value, String(name))}
             />
             {showBaseline ? (
@@ -190,6 +192,15 @@ export function ComparisonChart({ result }: { result: SimulationResult }) {
           </LineChart>
         </ResponsiveContainer>
       )}
+      {!empty ? (
+        <LatexMarkdown
+          className="text-center text-xs text-zinc-500"
+          content={
+            'Ejes: tiempo $t$ desde el inicio ($\\mathrm{d}$); eje vertical: $\\mathrm{TPH}$ ' +
+            '($\\mathrm{mg\\,kg}^{-1}$). Tooltip: valores redondeados.'
+          }
+        />
+      ) : null}
     </div>
   );
 }

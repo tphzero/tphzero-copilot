@@ -141,45 +141,46 @@ export function computeOperationalRateMultiplier(
   const factors: OperationalFactorBreakdown[] = [
     {
       id: 'temperatura',
-      label: 'Temperatura (Q10)',
+      label: 'Temperatura ($Q_{10}$)',
       ratio: rTclamped,
-      basis: `Q10=${Q10}: factor ${rTclamped.toFixed(3)} respecto a la referencia`,
+      basis: `Regla $Q_{10} = ${Q10}$; cociente respecto a la referencia $r_T \\approx ${rTclamped.toFixed(3)}$.`,
     },
     {
       id: 'humedad',
-      label: 'Humedad (campana)',
+      label: 'Humedad (campana gaussiana)',
       ratio: rW,
-      basis: 'Campana alrededor del rango optimo de humedad',
+      basis:
+        'Campana alrededor del rango optimo de humedad (factor adimensional en $[0,1]$ aprox.).',
     },
     {
       id: 'oxigeno',
-      label: 'Oxigeno (Monod)',
+      label: 'Oxigeno (Monod, $K_{\\mathrm{O}_2}$)',
       ratio: rO,
-      basis: `Semisaturacion K=${K_O2_PCT}%`,
+      basis: `Semisaturacion de Monod $K_{\\mathrm{O}_2} = ${K_O2_PCT}~\\%$.`,
     },
     {
       id: 'n',
-      label: 'N (Monod)',
+      label: 'N (Monod, $K_{\\mathrm{N}}$)',
       ratio: rN,
-      basis: `K=${K_N_MGKG} mg/kg`,
+      basis: `Semisaturacion $K_{\\mathrm{N}} = ${K_N_MGKG}~\\mathrm{mg\\,kg}^{-1}$.`,
     },
     {
       id: 'p',
-      label: 'P (Monod)',
+      label: 'P (Monod, $K_{\\mathrm{P}}$)',
       ratio: rP,
-      basis: `K=${K_P_MGKG} mg/kg`,
+      basis: `Semisaturacion $K_{\\mathrm{P}} = ${K_P_MGKG}~\\mathrm{mg\\,kg}^{-1}$.`,
     },
     {
       id: 'k',
-      label: 'K (Monod)',
+      label: 'Potasio — Monod ($K_{\\mathrm{K}}$)',
       ratio: rK,
-      basis: `K=${K_K_MGKG} mg/kg`,
+      basis: `Semisaturacion $K_{\\mathrm{K}} = ${K_K_MGKG}~\\mathrm{mg\\,kg}^{-1}$.`,
     },
     {
       id: 'volteo',
       label: 'Volteo / mezcla',
       ratio: rVol,
-      basis: `1/(1+d/${VOLTEO_SCALE_DAYS} d) con d = dias entre volteos`,
+      basis: `Funcion tipo $1/(1 + d/d_0)$ con $d_0 = ${VOLTEO_SCALE_DAYS}~\\mathrm{d}$ y $d$ = intervalo entre volteos ($\\mathrm{d}$).`,
     },
   ];
 
