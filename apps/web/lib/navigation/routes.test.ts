@@ -4,6 +4,7 @@ import {
   datasetBiopilaPath,
   datasetDashboardPath,
   datasetIdFromPathname,
+  safeDecodePathSegment,
   truncateDatasetId,
 } from './routes';
 
@@ -22,6 +23,17 @@ describe('datasetBiopilaPath', () => {
     expect(datasetBiopilaPath('ds-1', 'B1')).toBe(
       '/datasets/ds-1/biopila/B1'
     );
+  });
+});
+
+describe('safeDecodePathSegment', () => {
+  it('decodes valid percent-encoding', () => {
+    expect(safeDecodePathSegment('a%2Fb')).toBe('a/b');
+  });
+
+  it('returns raw segment when decoding throws (malformed escape)', () => {
+    const bad = '%E0%A4%A';
+    expect(safeDecodePathSegment(bad)).toBe(bad);
   });
 });
 

@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ActiveDatasetChip } from '@/components/layout/active-dataset-chip';
 import { buttonVariants } from '@/components/ui/button';
 import { useActiveDataset } from '@/lib/context/dataset-context';
-import { datasetDashboardPath } from '@/lib/navigation/routes';
+import { datasetDashboardPath, safeDecodePathSegment } from '@/lib/navigation/routes';
 import { cn } from '@/lib/utils';
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
@@ -36,7 +36,7 @@ function getPageMeta(pathname: string): { title: string; subtitle: string } {
 
   const biopilaDetail = pathname.match(/^\/datasets\/[^/]+\/biopila\/([^/]+)\/?$/);
   if (biopilaDetail) {
-    const biopilaId = decodeURIComponent(biopilaDetail[1]!);
+    const biopilaId = safeDecodePathSegment(biopilaDetail[1]!);
     return {
       title: biopilaId,
       subtitle: 'Mediciones, evolución temporal y variables ambientales.',

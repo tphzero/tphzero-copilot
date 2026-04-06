@@ -3,7 +3,11 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
-import { datasetDashboardPath, truncateDatasetId } from '@/lib/navigation/routes';
+import {
+  datasetDashboardPath,
+  safeDecodePathSegment,
+  truncateDatasetId,
+} from '@/lib/navigation/routes';
 import { cn } from '@/lib/utils';
 
 export function DatasetBreadcrumbs({
@@ -19,7 +23,9 @@ export function DatasetBreadcrumbs({
   const titleAttr = datasetName ? `${datasetName} · ${datasetId}` : datasetId;
   const biopilaMatch = pathname.match(/\/biopila\/([^/]+)/);
   const biopilaSegment = biopilaMatch?.[1];
-  const biopilaId = biopilaSegment ? decodeURIComponent(biopilaSegment) : null;
+  const biopilaId = biopilaSegment
+    ? safeDecodePathSegment(biopilaSegment)
+    : null;
   const isDashboard = pathname.endsWith('/dashboard');
 
   return (

@@ -21,13 +21,18 @@ export function truncateDatasetId(
   return `${id.slice(0, maxChars)}…`;
 }
 
+/** Decodes a URL path segment; on malformed `%` sequences returns the raw segment. */
+export function safeDecodePathSegment(segment: string): string {
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
+}
+
 /** First path segment under `/datasets/…` (decoded), or null if not a dataset route. */
 export function datasetIdFromPathname(pathname: string): string | null {
   const m = pathname.match(/^\/datasets\/([^/]+)(?:\/|$)/);
   if (!m) return null;
-  try {
-    return decodeURIComponent(m[1]);
-  } catch {
-    return m[1];
-  }
+  return safeDecodePathSegment(m[1]);
 }
