@@ -19,6 +19,20 @@ const simulationResultSchema = z.object({
   estimatedTimeSavedDays: z.number().nullable(),
   modelId: z.string(),
   horizonDays: z.number(),
+  kinetics: z.object({
+    kPerDay: z.number(),
+    tphInitialMgkg: z.number(),
+    effectiveRateMultiplier: z.number(),
+    referenceTiempoDias: z.number(),
+    factors: z.array(
+      z.object({
+        id: z.string(),
+        label: z.string(),
+        ratio: z.number(),
+        basis: z.string(),
+      })
+    ),
+  }),
 });
 
 const bodySchema = z.object({
@@ -79,6 +93,19 @@ export async function POST(req: Request) {
       diasTiempoAhorradoEstimado: facts.diasTiempoAhorradoEstimado,
     },
     parametrosAjustadosEtiquetados,
+    cineticaWhatIf: {
+      kHistorialPorDia: result.kinetics.kPerDay,
+      tphInicialSerieMgkg: result.kinetics.tphInitialMgkg,
+      multiplicadorOperativoM: result.kinetics.effectiveRateMultiplier,
+      medicionReferenciaDia: result.kinetics.referenceTiempoDias,
+      factoresMultiplicativosVsReferencia: result.kinetics.factors.map((f) => ({
+        variable: f.label,
+        ratio: f.ratio,
+        nota: f.basis,
+      })),
+      notaInterpretacion:
+        'M resume el efecto de los sliders frente a la ultima medicion (Q10, Monod, humedad, volteo). No es un resultado experimental.',
+    },
   };
 
   const system = `Eres un asistente tecnico para remediacion de suelos. Responde SIEMPRE en espanol.
@@ -94,6 +121,9 @@ DELTA DE REDUCCION:
 
 PARAMETROS AJUSTADOS:
 - Lista solo entradas de "parametrosAjustadosEtiquetados" usando "nombreParaUsuario" y "unidad". No escribas claves internas tipo oxigenoPct ni fragmentes letras en matematicas.
+
+CINETICA WHAT-IF:
+- Usa "cineticaWhatIf" para explicar como el modelo combina k del historial con el multiplicador M y los factores listados. No inventes coeficientes distintos a los implicitos en esos numeros.
 
 TIEMPO AHORRADO:
 - Si "metricas.diasTiempoAhorradoEstimado" es null, di que no hay estimacion (no inventes dias).

@@ -107,13 +107,39 @@ El simulador debe permitir explorar **escenarios hipotéticos** sobre una biopil
 
 ## 8. Notas de implementación (no funcionales, orientativas)
 
-- El código actual del estimador what-if (`simulateScenario`) construye `modified` pero la proyección “simulada” debe **usar coherentemente** las mediciones modificadas y el factor de ajuste; cualquier discrepancia entre comentario del código y el cálculo real debe corregirse para cumplir los criterios de aceptación.
-- Los **modelos** adicionales “seleccionables” pueden ser, en una primera iteración, variantes del predictor (p. ej. distintos horizontes, pesos o formulaciones) siempre que cada uno tenga **definición** y **metadatos** para la UI; la especificación no impone nombres concretos de algoritmos hasta que el equipo los catalogue en código.
+- El motor what-if (`simulateScenario`) debe exponer **de forma trazable** cómo combina el historial con los parámetros operativos (ver §9). Las variantes seleccionables siguen siendo principalmente **horizontes de proyección** con metadatos en UI.
 - La recomendación automática debe ser **determinística** para el mismo dataset+biopila (mismas entradas → mismo modelo recomendado), para evitar confusión.
 
 ---
 
-## 9. Riesgos y mitigaciones
+## 9. Motor what-if (cinética efectiva) y transparencia — registro 2026-04-06
+
+**Contexto.** Una primera implementación aplicaba un factor de “optimalidad” sobre la clasificación discreta del estado de la biopila y no enlazaba bien los sliders con la curva exponencial ajustada al historial, de modo que el gráfico apenas reaccionaba a los parámetros.
+
+**Decisión de producto (cerrada).**
+
+| Tema | Decisión |
+|------|----------|
+| Línea base | Proyección exponencial \(\mathrm{TPH}(t) = \mathrm{TPH}_0 \, e^{-k t}\) con \(k\) (1/d) estimado por regresión lineal sobre \(\ln(\mathrm{TPH}/\mathrm{TPH}_0)\) frente al tiempo, usando solo el **historial** de la biopila. |
+| Escenario simulado | Misma \(\mathrm{TPH}_0\) y mismo \(k\) que la línea base; la tasa efectiva es **\(k_{\mathrm{sim}} = k \cdot M\)**. La curva simulada es \(\mathrm{TPH}(t) = \mathrm{TPH}_0 \, e^{-k M t}\) sobre la misma rejilla temporal que la base. |
+| Referencia para \(M\) | Los sliders se comparan con la **última medición** de la biopila en el dataset (misma referencia que la inicialización de controles). |
+| Forma de \(M\) | **\(M = \prod_i f_i(\mathrm{sim}) / f_i(\mathrm{ref})\)** (producto de cocientes adimensionales), con factores inspirados en prácticas habituales de biorremediación: temperatura (regla **Q10** respecto a la referencia), humedad (factor tipo **campana** alrededor de un óptimo operativo), oxígeno y nutrientes N, P, K (**Monod** / limitación), volteo (proxy de **mezcla y aeración** según días entre volteos). |
+| Coeficientes | Valores **a priori** en código (Q10, constantes de semisaturación, forma de humedad); **calibrables** en el futuro; **no** sustituyen ensayo de campo ni garantizan plazos. |
+| Acotación | \(M\) se limita a un rango numérico razonable para evitar proyecciones extremas no defendibles en UI. |
+
+**Transparencia en la aplicación.**
+
+- **Modelo activo:** ecuación y texto que describen \(\mathrm{TPH}_0 \, e^{-k M t}\) y el significado de \(M\) (metadatos en `simulator-models`).
+- **Panel colapsable** “Cómo se calcula el escenario simulado”: \(k\), \(M\), desglose de factores respecto a la referencia, y **disclaimer** de que la herramienta no predice el campo con certeza.
+- **Explicación por IA:** el backend adjunta `cineticaWhatIf` ( \(k\), \(M\), factores) al payload estructurado para que el LLM **interprete** sin inventar otra mecánica.
+
+**Modelo de datos.** `PredictionResult` puede incluir `kFit` \(\{k\mathrm{PerDay}, \mathrm{tphInicialMgkg}\}\) cuando el ajuste converge. `SimulationResult` incluye **`kinetics`** con multiplicador, día de referencia y factores.
+
+**Tests.** Cobertura unitaria del multiplicador operativo y de `simulateScenario` frente a cambios de parámetros.
+
+---
+
+## 10. Riesgos y mitigaciones
 
 | Riesgo | Mitigación |
 |--------|------------|
@@ -123,7 +149,7 @@ El simulador debe permitir explorar **escenarios hipotéticos** sobre una biopil
 
 ---
 
-## 10. Referencias
+## 11. Referencias
 
 - Issue Linear: [TPH-12](https://linear.app/tphzero-team/issue/TPH-12/simulador-hacer-funcionar-correctamente-todo-el-modulo)
 - `SPEC.md` del repositorio — sección F6 y motor de modelos.

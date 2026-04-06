@@ -1,6 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { Measurement } from '@tphzero/domain';
-import * as predictor from './predictor';
 import { simulateScenario } from './simulator';
 
 function baseMeasurement(overrides: Partial<Measurement> = {}): Measurement {
@@ -54,7 +53,7 @@ describe('simulateScenario', () => {
     expect(Math.abs(lastB - lastS)).toBeLessThan(1);
   });
 
-  it('la segunda llamada a predictTPH usa mediciones modificadas (no el mismo array que la base)', () => {
+  it('con parametros distintos a la referencia, el multiplicador operativo y la curva cambian', () => {
     const m0 = baseMeasurement({
       id: 'a',
       tiempoDias: 0,
@@ -66,9 +65,8 @@ describe('simulateScenario', () => {
       tphActualMgkg: 800,
     });
 
-    const spy = vi.spyOn(predictor, 'predictTPH');
-
-    simulateScenario(
+    const base = simulateScenario([m0, m1], {}, { modelId: 'standard-360' });
+    const moved = simulateScenario(
       [m0, m1],
       {
         humedadSueloPct: 5,
@@ -82,12 +80,12 @@ describe('simulateScenario', () => {
       { modelId: 'standard-360' }
     );
 
-    expect(spy).toHaveBeenCalledTimes(2);
-    const firstArg = spy.mock.calls[0]?.[0];
-    const secondArg = spy.mock.calls[1]?.[0];
-    expect(firstArg).not.toBe(secondArg);
-    expect(secondArg?.[0]?.humedadSueloPct).toBe(5);
-    spy.mockRestore();
+    expect(moved.kinetics.effectiveRateMultiplier).not.toBe(
+      base.kinetics.effectiveRateMultiplier
+    );
+    const lastB = base.simulated.tphProjected.at(-1) ?? 0;
+    const lastS = moved.simulated.tphProjected.at(-1) ?? 0;
+    expect(Math.abs(lastB - lastS)).toBeGreaterThan(1);
   });
 
   it('expone horizonDays segun el modelo registrado', () => {

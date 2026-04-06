@@ -13,57 +13,56 @@ export interface SimulatorModelMeta {
   horizonDays: number;
 }
 
+const KINETICS_CAPTION =
+  'Linea base: k (1/d) se ajusta por regresion sobre ln(TPH/TPH0) vs t con el historial. Escenario simulado: se usa la misma TPH0 y el mismo k, pero la tasa efectiva es k M, con M = producto de factores adimensionales que comparan los sliders con la ultima medicion: temperatura (ley Q10 respecto a la referencia), humedad (campana alrededor de un optimo), oxigeno y nutrientes N-P-K (cinética tipo Monod / limitacion), y volteo (proxy de aeracion-mezcla con intervalos entre volteos). Los coeficientes (Q10, K de Monod, forma de humedad) son valores a priori calibrables; no sustituyen un ensayo de campo.';
+
 export const SIMULATOR_MODELS: SimulatorModelMeta[] = [
   {
     id: 'conservative-180',
     name: 'Exponencial conservadora (180 d)',
     equationLatex:
-      String.raw`\mathrm{TPH}(t) = \mathrm{TPH}_0 \, e^{-k t} \quad (\mathrm{mg/kg})`,
-    equationCaption:
-      'k se estima por regresion lineal sobre ln(TPH/TPH0) frente al tiempo t (dias), con datos del historial.',
+      String.raw`\mathrm{TPH}(t) = \mathrm{TPH}_0 \, e^{-k M t}, \quad M = \prod_i f_i \quad (\mathrm{mg/kg})`,
+    equationCaption: KINETICS_CAPTION,
     hypothesis:
-      'La degradacion sigue una ley exponencial; el horizonte corto reduce el riesgo de extrapolacion con pocos datos.',
+      'Cinética de primer orden en TPH en el historial; los factores f_i escalan la tasa segun variables operativas respecto a la ultima medicion (formulacion habitual en microbiologia de suelos y limitacion por sustrato).',
     limitations:
-      'Menos precision a largo plazo; no modela cambios bruscos de regimen ni eventos puntuales no reflejados en el historial.',
+      'Horizonte corto para limitar extrapolacion; M es un modelo compacto: no captura todos los fenomenos (metabolitos, toxicidad, heterogeneidad espacial).',
     horizonDays: 180,
   },
   {
     id: 'standard-360',
     name: 'Exponencial estandar (360 d)',
     equationLatex:
-      String.raw`\mathrm{TPH}(t) = \mathrm{TPH}_0 \, e^{-k t} \quad (\mathrm{mg/kg})`,
-    equationCaption:
-      'k se estima por regresion lineal sobre ln(TPH/TPH0) frente al tiempo t (dias), con datos del historial.',
+      String.raw`\mathrm{TPH}(t) = \mathrm{TPH}_0 \, e^{-k M t}, \quad M = \prod_i f_i \quad (\mathrm{mg/kg})`,
+    equationCaption: KINETICS_CAPTION,
     hypothesis:
-      'La reduccion de TPH es aproximadamente exponencial en el tiempo con parametros estables en el rango observado.',
+      'La trayectoria observada es compatible con una tasa efectiva constante en el tramo ajustado; M modula esa tasa segun hipotesis de Q10, Monod y disponibilidad de agua.',
     limitations:
-      'Asume continuidad del proceso; no sustituye mediciones de campo ni garantiza el cumplimiento de plazos.',
+      'Asume que el historial representa el regimen futuro; no garantiza plazos ni reemplaza validacion experimental.',
     horizonDays: 360,
   },
   {
     id: 'extended-540',
     name: 'Exponencial extendida (540 d)',
     equationLatex:
-      String.raw`\mathrm{TPH}(t) = \mathrm{TPH}_0 \, e^{-k t} \quad (\mathrm{mg/kg})`,
-    equationCaption:
-      'k se estima por regresion lineal sobre ln(TPH/TPH0) frente al tiempo t (dias), con datos del historial.',
+      String.raw`\mathrm{TPH}(t) = \mathrm{TPH}_0 \, e^{-k M t}, \quad M = \prod_i f_i \quad (\mathrm{mg/kg})`,
+    equationCaption: KINETICS_CAPTION,
     hypothesis:
-      'Con historial suficiente, la misma forma exponencial puede proyectarse mas alla del horizonte estandar.',
+      'Con historial suficiente, la misma forma exponencial puede proyectarse mas alla; M sigue interpretandose como escenario operativo frente a la ultima medicion.',
     limitations:
-      'A mayor horizonte, mayor incertidumbre; revisar coherencia con limites operativos y nuevas mediciones.',
+      'A mayor horizonte, mayor incertidumbre; la sensibilidad a sliders no implica precision absoluta del tiempo de remediacion.',
     horizonDays: 540,
   },
   {
     id: 'custom-horizon',
     name: 'Horizonte personalizado',
     equationLatex:
-      String.raw`\mathrm{TPH}(t) = \mathrm{TPH}_0 \, e^{-k t} \quad (\mathrm{mg/kg})`,
-    equationCaption:
-      'k se estima por regresion lineal sobre ln(TPH/TPH0) frente al tiempo t (dias). El numero de dias de horizonte se fija explicitamente (p. ej. desde la herramienta de chat) cuando no coincide con un modelo predefinido.',
+      String.raw`\mathrm{TPH}(t) = \mathrm{TPH}_0 \, e^{-k M t}, \quad M = \prod_i f_i \quad (\mathrm{mg/kg})`,
+    equationCaption: `${KINETICS_CAPTION} El horizonte de dias de proyeccion se fija explicitamente cuando no coincide con un modelo predefinido.`,
     hypothesis:
-      'Misma forma exponencial que los demas modelos; el horizonte de dias es el indicado en la simulacion.',
+      'Misma forma que los demas modelos; solo cambia el horizonte numerico de la rejilla temporal.',
     limitations:
-      'Revisar que el horizonte elegido sea coherente con los datos y con el uso previsto del escenario.',
+      'Revisar coherencia entre horizonte elegido, datos disponibles y uso de la simulacion.',
     horizonDays: 360,
   },
 ];

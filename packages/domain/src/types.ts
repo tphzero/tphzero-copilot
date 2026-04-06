@@ -52,6 +52,25 @@ export interface PredictionResult {
   estimatedDaysTo90Pct: number | null;
   currentReductionRate: number;
   confidence: 'alta' | 'media' | 'baja';
+  /** Si el ajuste exponencial TPH ~ exp(-k t) convergio, expone k y TPH0 usados. */
+  kFit?: { kPerDay: number; tphInicialMgkg: number };
+}
+
+/** Trazabilidad del multiplicador operativo k_sim = k_historial * M (motor what-if). */
+export interface SimulationKineticsInfo {
+  /** k (1/d) ajustado al historial (TPH ~ exp(-k t)). */
+  kPerDay: number;
+  tphInitialMgkg: number;
+  /** M: factor global; curva simulada usa k*M. */
+  effectiveRateMultiplier: number;
+  /** Dia de la medicion de referencia (ultima del historial ordenado). */
+  referenceTiempoDias: number;
+  factors: {
+    id: string;
+    label: string;
+    ratio: number;
+    basis: string;
+  }[];
 }
 
 export interface SimulationResult {
@@ -63,6 +82,8 @@ export interface SimulationResult {
   modelId: string;
   /** Horizonte de proyeccion en dias (alineado con el modelo seleccionado). */
   horizonDays: number;
+  /** Como se combinan datos historicos y parametros operativos (transparencia). */
+  kinetics: SimulationKineticsInfo;
 }
 
 export interface CorrelationResult {

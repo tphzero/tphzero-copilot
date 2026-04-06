@@ -35,6 +35,13 @@ describe('buildSimulatorSeriesFacts', () => {
       estimatedTimeSavedDays: null,
       modelId: 'extended-540',
       horizonDays: 540,
+      kinetics: {
+        kPerDay: 0.01,
+        tphInitialMgkg: 80000,
+        effectiveRateMultiplier: 1.1,
+        referenceTiempoDias: 30,
+        factors: [],
+      },
     };
 
     const f = buildSimulatorSeriesFacts(result);

@@ -18,6 +18,7 @@ import {
 import { ActiveModelPanel } from '@/components/simulator/active-model-panel';
 import { ComparisonChart } from '@/components/simulator/comparison-chart';
 import { SimulatorExplanation } from '@/components/simulator/simulator-explanation';
+import { SimulatorKineticsPanel } from '@/components/simulator/simulator-kinetics-panel';
 import { VariableSliders } from '@/components/simulator/variable-sliders';
 import { simulateScenario } from '@/lib/models/simulator';
 import {
@@ -257,8 +258,10 @@ export default function SimulatorPage() {
       <div>
         <h1 className="text-2xl font-bold">Simulador What-If</h1>
         <p className="text-sm text-zinc-400">
-          Modifica variables operativas y observa como cambia la proyeccion de TPH. La
-          comparacion se recalcula al mover controles o cambiar el modelo.
+          Modifica variables operativas y observa como cambia la proyeccion de TPH. La linea base
+          usa solo el historial; el escenario simulado escala la tasa con factores (Q10, Monod,
+          humedad, volteo) respecto a la ultima medicion. Abre &quot;Como se calcula el escenario
+          simulado&quot; para el detalle y limitaciones.
         </p>
       </div>
 
@@ -332,6 +335,8 @@ export default function SimulatorPage() {
                 recommendationReason={recommendation.reason}
                 onModelChange={(id) => setSelectedModelId(id)}
               />
+
+              {result ? <SimulatorKineticsPanel kinetics={result.kinetics} /> : null}
 
               {result ? (
                 <>
