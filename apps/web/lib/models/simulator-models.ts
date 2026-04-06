@@ -68,6 +68,11 @@ export const SIMULATOR_MODELS: SimulatorModelMeta[] = [
   },
 ];
 
+/** Modelos elegibles en la UI (excluye variantes solo para API/herramientas). */
+export const SIMULATOR_MODELS_SELECTABLE = SIMULATOR_MODELS.filter(
+  (m) => m.id !== 'custom-horizon'
+);
+
 /** Opciones alineadas con `SimulateScenarioOptions` en simulator.ts. */
 export function resolveSimulationModelFromOptions(options?: {
   modelId?: string;
@@ -78,15 +83,19 @@ export function resolveSimulationModelFromOptions(options?: {
 
   if (explicitModelId) {
     const meta = getSimulatorModelById(explicitModelId);
+    const normalizedId =
+      meta != null ? explicitModelId : 'standard-360';
     const horizon =
       explicitHorizon ??
       meta?.horizonDays ??
-      resolveSimulatorHorizonDays(explicitModelId);
-    return { modelId: explicitModelId, horizonDays: horizon };
+      resolveSimulatorHorizonDays(normalizedId);
+    return { modelId: normalizedId, horizonDays: horizon };
   }
 
   if (explicitHorizon != null) {
-    const byHorizon = SIMULATOR_MODELS.find((m) => m.horizonDays === explicitHorizon);
+    const byHorizon = SIMULATOR_MODELS_SELECTABLE.find(
+      (m) => m.horizonDays === explicitHorizon
+    );
     if (byHorizon) {
       return { modelId: byHorizon.id, horizonDays: explicitHorizon };
     }

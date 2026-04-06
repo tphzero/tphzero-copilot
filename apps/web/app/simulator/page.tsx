@@ -24,6 +24,7 @@ import {
   getSimulatorModelById,
   recommendSimulatorModel,
   SIMULATOR_MODELS,
+  SIMULATOR_MODELS_SELECTABLE,
 } from '@/lib/models/simulator-models';
 import { useActiveDataset } from '@/lib/context/dataset-context';
 
@@ -325,7 +326,7 @@ export default function SimulatorPage() {
           {selectedMeasurements.length >= 2 ? (
             <>
               <ActiveModelPanel
-                models={SIMULATOR_MODELS}
+                models={SIMULATOR_MODELS_SELECTABLE}
                 selectedId={selectedModelId}
                 recommendedId={recommendation.modelId}
                 recommendationReason={recommendation.reason}

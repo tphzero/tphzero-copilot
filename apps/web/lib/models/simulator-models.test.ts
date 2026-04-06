@@ -59,6 +59,19 @@ describe('resolveSimulationModelFromOptions', () => {
       resolveSimulationModelFromOptions({ modelId: 'standard-360', horizonDays: 720 })
     ).toEqual({ modelId: 'standard-360', horizonDays: 720 });
   });
+
+  it('modelId desconocido se normaliza a standard-360', () => {
+    expect(resolveSimulationModelFromOptions({ modelId: 'typo-inexistente' })).toEqual({
+      modelId: 'standard-360',
+      horizonDays: 360,
+    });
+  });
+
+  it('modelId desconocido con horizonte explicito conserva el horizonte', () => {
+    expect(
+      resolveSimulationModelFromOptions({ modelId: 'foo', horizonDays: 720 })
+    ).toEqual({ modelId: 'standard-360', horizonDays: 720 });
+  });
 });
 
 describe('recommendSimulatorModel', () => {
