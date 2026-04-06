@@ -8,8 +8,16 @@ dist
 # Turborepo
 .turbo
 
-# Env files
-.env*.local
+# Environment variables — never commit secrets (any directory)
+.env
+**/.env
+.env.*
+**/.env.*
+# Committed templates only (must stay after ignore rules above)
+!.env.local.example
+!**/.env.local.example
+!.env.example
+!**/.env.example
 
 # OS
 .DS_Store

@@ -9,6 +9,7 @@ import { Dropzone } from '@/components/upload/dropzone';
 import { EmptyState } from '@/components/upload/empty-state';
 import { Button } from '@/components/ui/button';
 import { useActiveDataset } from '@/lib/context/dataset-context';
+import { datasetDashboardPath } from '@/lib/navigation/routes';
 import type { ActiveDataset, ApiDatasetRow } from '@/lib/types/dataset';
 
 export default function HomePage() {
@@ -55,7 +56,7 @@ export default function HomePage() {
   function handleLoad(dataset: ActiveDataset) {
     setActiveDataset(dataset);
     setShowUpload(false);
-    router.push('/dashboard');
+    router.push(datasetDashboardPath(dataset.id));
   }
 
   function handleDelete(id: string) {

@@ -8,17 +8,38 @@ import {
   SlidersHorizontal,
   Upload,
 } from 'lucide-react';
+import { useActiveDataset } from '@/lib/context/dataset-context';
+import { useLatestDatasetId } from '@/hooks/use-latest-dataset-id';
+import { datasetDashboardPath } from '@/lib/navigation/routes';
 import { cn } from '@/lib/utils';
 
-const NAV_ITEMS = [
-  { href: '/', label: 'Carga de Datos', icon: Upload },
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/chat', label: 'Chat IA', icon: MessageSquare },
-  { href: '/simulator', label: 'Simulador', icon: SlidersHorizontal },
-];
+const STATIC_NAV = [
+  {
+    href: '/',
+    label: 'Carga de Datos',
+    icon: Upload,
+    match: (p: string) => p === '/',
+  },
+  {
+    href: '/chat',
+    label: 'Chat IA',
+    icon: MessageSquare,
+    match: (p: string) => p.startsWith('/chat'),
+  },
+  {
+    href: '/simulator',
+    label: 'Simulador',
+    icon: SlidersHorizontal,
+    match: (p: string) => p.startsWith('/simulator'),
+  },
+] as const;
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const { activeDataset } = useActiveDataset();
+  const { latestDatasetId, loading } = useLatestDatasetId();
+
+  const dashboardTargetId = activeDataset?.id ?? latestDatasetId;
 
   return (
     <aside className="flex h-full w-20 shrink-0 flex-col border-r border-zinc-800 bg-zinc-950/95 px-2 py-4 md:w-56 md:px-3">
@@ -30,9 +51,8 @@ export function SidebarNav() {
       </div>
 
       <nav className="flex flex-1 flex-col gap-1">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const isActive =
-            href === '/' ? pathname === href : pathname.startsWith(href);
+        {STATIC_NAV.map(({ href, label, icon: Icon, match }) => {
+          const isActive = match(pathname);
 
           return (
             <Link
@@ -50,6 +70,35 @@ export function SidebarNav() {
             </Link>
           );
         })}
+
+        {!loading && dashboardTargetId ? (
+          <Link
+            href={datasetDashboardPath(dashboardTargetId)}
+            className={cn(
+              'flex items-center justify-center rounded-md px-3 py-2 text-sm transition-colors md:justify-start',
+              pathname.startsWith(`/datasets/${dashboardTargetId}/`)
+                ? 'bg-zinc-800 text-white'
+                : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
+            )}
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span className="hidden md:inline">Dashboard</span>
+          </Link>
+        ) : !loading ? (
+          <span
+            className="flex cursor-not-allowed items-center justify-center rounded-md px-3 py-2 text-sm text-zinc-600 md:justify-start"
+            title="Selecciona o carga un dataset desde Carga de Datos para abrir el dashboard"
+            aria-disabled
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span className="hidden md:inline">Dashboard</span>
+          </span>
+        ) : (
+          <span className="flex items-center justify-center rounded-md px-3 py-2 text-sm text-zinc-600 md:justify-start">
+            <LayoutDashboard className="h-4 w-4" />
+            <span className="hidden md:inline">Dashboard</span>
+          </span>
+        )}
       </nav>
 
       <div className="hidden rounded-lg border border-zinc-800 bg-zinc-900/60 p-3 md:block">

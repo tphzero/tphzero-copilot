@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { datasetDashboardPath } from '@/lib/navigation/routes';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -60,7 +61,7 @@ export function DataPreview({ dataset }: DataPreviewProps) {
             Nivel {dataset.level}
           </Badge>
           <Button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push(datasetDashboardPath(dataset.id))}
             className="bg-emerald-600 hover:bg-emerald-700"
           >
             Comenzar analisis
