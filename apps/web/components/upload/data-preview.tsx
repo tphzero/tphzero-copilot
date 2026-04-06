@@ -13,16 +13,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
-interface UploadedDataset {
-  id: string;
-  name: string;
-  rowCount: number;
-  level: number;
-}
+import type { ActiveDataset } from '@/lib/types/dataset';
 
 interface DataPreviewProps {
-  dataset: UploadedDataset;
+  dataset: ActiveDataset;
 }
 
 export function DataPreview({ dataset }: DataPreviewProps) {

@@ -4,16 +4,10 @@ import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { AlertTriangle, FileCheck, Loader2, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface UploadedDataset {
-  id: string;
-  name: string;
-  rowCount: number;
-  level: number;
-}
+import type { ActiveDataset } from '@/lib/types/dataset';
 
 interface DropzoneProps {
-  onFileUploaded: (dataset: UploadedDataset) => void;
+  onFileUploaded: (dataset: ActiveDataset) => void;
 }
 
 export function Dropzone({ onFileUploaded }: DropzoneProps) {
@@ -40,7 +34,7 @@ export function Dropzone({ onFileUploaded }: DropzoneProps) {
         const data = (await res.json()) as {
           error?: string;
           details?: string | string[];
-          dataset?: UploadedDataset;
+          dataset?: ActiveDataset;
         };
 
         if (!res.ok || !data.dataset) {

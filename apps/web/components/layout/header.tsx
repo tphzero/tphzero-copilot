@@ -2,6 +2,8 @@
 
 import { usePathname } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
+import { ActiveDatasetChip } from '@/components/layout/active-dataset-chip';
+import { useActiveDataset } from '@/lib/context/dataset-context';
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   '/': {
@@ -36,6 +38,7 @@ function getPageMeta(pathname: string) {
 export function Header() {
   const pathname = usePathname();
   const meta = getPageMeta(pathname);
+  const { activeDataset } = useActiveDataset();
 
   return (
     <header className="border-b border-zinc-800 bg-zinc-950/80 px-6 py-4 backdrop-blur">
@@ -52,12 +55,16 @@ export function Header() {
           </div>
         </div>
 
-        <Badge
-          variant="outline"
-          className="w-fit border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-emerald-300"
-        >
-          Shell operativo
-        </Badge>
+        {activeDataset ? (
+          <ActiveDatasetChip />
+        ) : (
+          <Badge
+            variant="outline"
+            className="w-fit border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-emerald-300"
+          >
+            Shell operativo
+          </Badge>
+        )}
       </div>
     </header>
   );

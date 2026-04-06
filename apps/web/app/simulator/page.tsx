@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Play, RotateCcw } from 'lucide-react';
 import type { Measurement, SimulationResult } from '@tphzero/domain';
 import { Badge } from '@/components/ui/badge';
@@ -17,10 +18,7 @@ import {
 import { ComparisonChart } from '@/components/simulator/comparison-chart';
 import { VariableSliders } from '@/components/simulator/variable-sliders';
 import { simulateScenario } from '@/lib/models/simulator';
-
-interface DatasetSummary {
-  id: string;
-}
+import { useActiveDataset } from '@/lib/context/dataset-context';
 
 type SimulatorValues = Record<string, number>;
 
@@ -37,6 +35,8 @@ function getValuesFromMeasurement(measurement: Measurement): SimulatorValues {
 }
 
 export default function SimulatorPage() {
+  const router = useRouter();
+  const { activeDataset } = useActiveDataset();
   const [allMeasurements, setAllMeasurements] = useState<Measurement[]>([]);
   const [selectedBiopila, setSelectedBiopila] = useState('');
   const [values, setValues] = useState<SimulatorValues>({
@@ -52,19 +52,16 @@ export default function SimulatorPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!activeDataset) {
+      router.replace('/');
+      return;
+    }
+
     let active = true;
 
     async function loadSimulator() {
       try {
-        const datasetsResponse = await fetch('/api/data');
-        const datasetsPayload = (await datasetsResponse.json()) as {
-          datasets?: DatasetSummary[];
-        };
-
-        const latestDataset = datasetsPayload.datasets?.[0];
-        if (!latestDataset) return;
-
-        const detailResponse = await fetch(`/api/data/${latestDataset.id}`);
+        const detailResponse = await fetch(`/api/data/${activeDataset.id}`);
         const detailPayload = (await detailResponse.json()) as {
           measurements?: Record<string, unknown>[];
         };
@@ -106,7 +103,7 @@ export default function SimulatorPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [activeDataset, router]);
 
   const biopilaIds = useMemo(
     () => [

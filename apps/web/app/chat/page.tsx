@@ -1,6 +1,24 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { ChatPanel } from '@/components/chat/chat-panel';
+import { useActiveDataset } from '@/lib/context/dataset-context';
 
 export default function ChatPage() {
+  const router = useRouter();
+  const { activeDataset } = useActiveDataset();
+
+  useEffect(() => {
+    if (!activeDataset) {
+      router.replace('/');
+    }
+  }, [activeDataset, router]);
+
+  if (!activeDataset) {
+    return null;
+  }
+
   return (
     <div className="h-full min-h-0">
       <ChatPanel />
