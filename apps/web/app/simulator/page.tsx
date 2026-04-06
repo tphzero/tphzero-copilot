@@ -57,11 +57,12 @@ export default function SimulatorPage() {
       return;
     }
 
+    const datasetId = activeDataset.id;
     let active = true;
 
     async function loadSimulator() {
       try {
-        const detailResponse = await fetch(`/api/data/${activeDataset.id}`);
+        const detailResponse = await fetch(`/api/data/${datasetId}`);
         const detailPayload = (await detailResponse.json()) as {
           measurements?: Record<string, unknown>[];
         };

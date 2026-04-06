@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ChevronDown, Database, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -9,10 +10,12 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useActiveDataset } from '@/lib/context/dataset-context';
+import { datasetDashboardPath } from '@/lib/navigation/routes';
 import type { ActiveDataset, ApiDatasetRow } from '@/lib/types/dataset';
 import { toActiveDataset } from '@/lib/types/dataset';
 
 export function ActiveDatasetChip() {
+  const router = useRouter();
   const { activeDataset, setActiveDataset } = useActiveDataset();
   const [isOpen, setIsOpen] = useState(false);
   const [datasets, setDatasets] = useState<ApiDatasetRow[]>([]);
@@ -36,6 +39,7 @@ export function ActiveDatasetChip() {
   const handleSelectDataset = (dataset: ActiveDataset) => {
     setActiveDataset(dataset);
     setIsOpen(false);
+    router.push(datasetDashboardPath(dataset.id));
   };
 
   return (

@@ -2,12 +2,19 @@ import Link from 'next/link';
 import type { BiopilaOverview } from '@tphzero/domain';
 import { StatusIndicator } from '@/components/charts/status-indicator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { datasetBiopilaPath } from '@/lib/navigation/routes';
 
-export function BiopilaCard({ biopila }: { biopila: BiopilaOverview }) {
+export function BiopilaCard({
+  datasetId,
+  biopila,
+}: {
+  datasetId: string;
+  biopila: BiopilaOverview;
+}) {
   const measurement = biopila.latestMeasurement;
 
   return (
-    <Link href={`/biopila/${biopila.biopilaId}`}>
+    <Link href={datasetBiopilaPath(datasetId, biopila.biopilaId)}>
       <Card className="h-full border-zinc-800 bg-zinc-900 transition-colors hover:border-zinc-700">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="font-mono text-base">{biopila.biopilaId}</CardTitle>
