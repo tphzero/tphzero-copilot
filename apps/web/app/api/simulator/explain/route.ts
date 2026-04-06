@@ -90,7 +90,7 @@ CONTRADICCIONES A EVITAR:
 - Si "primerDiaSimuladoTphCasiNulo" es un numero (ej. 198) y el horizonte del modelo es otro (ej. 540), debes explicar ambos sin igualarlos.
 
 DELTA DE REDUCCION:
-- Usa solo "metricas.deltaReduccionAcumuladaPpDelInicial" y la definicion en "metricas.definicionDeltaReduccion". Es una diferencia en puntos porcentuales del TPH inicial entre simulado y base al final de la serie; NO digas "magnitud no especificada".
+- Usa solo el valor "metricas.deltaReduccionAcumuladaPpDelInicial" y el texto literal de "metricas.definicionDeltaReduccion". Esa definicion es la fuente de verdad: describe el maximo a lo largo de la curva (no solo el ultimo punto). No reinterpretes el delta como "solo al final de la serie" ni digas "magnitud no especificada".
 
 PARAMETROS AJUSTADOS:
 - Lista solo entradas de "parametrosAjustadosEtiquetados" usando "nombreParaUsuario" y "unidad". No escribas claves internas tipo oxigenoPct ni fragmentes letras en matematicas.

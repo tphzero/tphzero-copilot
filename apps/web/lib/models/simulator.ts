@@ -2,7 +2,7 @@ import type { Measurement, SimulationResult } from '@tphzero/domain';
 import { classifyBiopilaState, TPH_REDUCTION_TARGET } from '@tphzero/domain';
 import { predictTPH } from './predictor';
 import { firstDayWhereTphAtOrBelow } from './simulator-explain-metrics';
-import { resolveSimulatorHorizonDays } from './simulator-models';
+import { resolveSimulationModelFromOptions } from './simulator-models';
 
 export interface SimulationParams {
   humedadSueloPct?: number;
@@ -17,7 +17,10 @@ export interface SimulationParams {
 export interface SimulateScenarioOptions {
   /** Horizonte en dias; si se omite, se deduce de `modelId`. */
   horizonDays?: number;
-  /** Debe existir en el registro de modelos salvo que se pase `horizonDays` explicito. */
+  /**
+   * Id de modelo registrado. Si solo se pasa `horizonDays`, se elige el modelo con ese
+   * horizonte o `custom-horizon` si no hay coincidencia (evita `standard-360` con otro horizonte).
+   */
   modelId?: string;
 }
 
@@ -32,9 +35,7 @@ export function simulateScenario(
   params: SimulationParams,
   options?: SimulateScenarioOptions
 ): SimulationResult {
-  const modelId = options?.modelId ?? 'standard-360';
-  const horizonDays =
-    options?.horizonDays ?? resolveSimulatorHorizonDays(modelId);
+  const { modelId, horizonDays } = resolveSimulationModelFromOptions(options);
 
   const baseline = predictTPH(measurements, horizonDays);
 

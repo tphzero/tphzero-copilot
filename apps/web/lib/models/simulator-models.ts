@@ -53,7 +53,51 @@ export const SIMULATOR_MODELS: SimulatorModelMeta[] = [
       'A mayor horizonte, mayor incertidumbre; revisar coherencia con limites operativos y nuevas mediciones.',
     horizonDays: 540,
   },
+  {
+    id: 'custom-horizon',
+    name: 'Horizonte personalizado',
+    equationLatex:
+      String.raw`\mathrm{TPH}(t) = \mathrm{TPH}_0 \, e^{-k t} \quad (\mathrm{mg/kg})`,
+    equationCaption:
+      'k se estima por regresion lineal sobre ln(TPH/TPH0) frente al tiempo t (dias). El numero de dias de horizonte se fija explicitamente (p. ej. desde la herramienta de chat) cuando no coincide con un modelo predefinido.',
+    hypothesis:
+      'Misma forma exponencial que los demas modelos; el horizonte de dias es el indicado en la simulacion.',
+    limitations:
+      'Revisar que el horizonte elegido sea coherente con los datos y con el uso previsto del escenario.',
+    horizonDays: 360,
+  },
 ];
+
+/** Opciones alineadas con `SimulateScenarioOptions` en simulator.ts. */
+export function resolveSimulationModelFromOptions(options?: {
+  modelId?: string;
+  horizonDays?: number;
+}): { modelId: string; horizonDays: number } {
+  const explicitModelId = options?.modelId;
+  const explicitHorizon = options?.horizonDays;
+
+  if (explicitModelId) {
+    const meta = getSimulatorModelById(explicitModelId);
+    const horizon =
+      explicitHorizon ??
+      meta?.horizonDays ??
+      resolveSimulatorHorizonDays(explicitModelId);
+    return { modelId: explicitModelId, horizonDays: horizon };
+  }
+
+  if (explicitHorizon != null) {
+    const byHorizon = SIMULATOR_MODELS.find((m) => m.horizonDays === explicitHorizon);
+    if (byHorizon) {
+      return { modelId: byHorizon.id, horizonDays: explicitHorizon };
+    }
+    return { modelId: 'custom-horizon', horizonDays: explicitHorizon };
+  }
+
+  return {
+    modelId: 'standard-360',
+    horizonDays: resolveSimulatorHorizonDays('standard-360'),
+  };
+}
 
 export function getSimulatorModelById(id: string): SimulatorModelMeta | undefined {
   return SIMULATOR_MODELS.find((m) => m.id === id);

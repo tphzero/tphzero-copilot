@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Measurement } from '@tphzero/domain';
-import { recommendSimulatorModel } from './simulator-models';
+import { recommendSimulatorModel, resolveSimulationModelFromOptions } from './simulator-models';
 
 function minimal(overrides: Partial<Measurement> = {}): Measurement {
   return {
@@ -32,6 +32,34 @@ function minimal(overrides: Partial<Measurement> = {}): Measurement {
     ...overrides,
   };
 }
+
+describe('resolveSimulationModelFromOptions', () => {
+  it('sin opciones usa standard-360', () => {
+    const r = resolveSimulationModelFromOptions();
+    expect(r.modelId).toBe('standard-360');
+    expect(r.horizonDays).toBe(360);
+  });
+
+  it('solo horizonDays que coincide con un modelo registrado usa ese id', () => {
+    expect(resolveSimulationModelFromOptions({ horizonDays: 540 })).toEqual({
+      modelId: 'extended-540',
+      horizonDays: 540,
+    });
+  });
+
+  it('solo horizonDays sin modelo registrado usa custom-horizon', () => {
+    expect(resolveSimulationModelFromOptions({ horizonDays: 720 })).toEqual({
+      modelId: 'custom-horizon',
+      horizonDays: 720,
+    });
+  });
+
+  it('modelId explicito conserva el id; horizonte puede sobreescribirse', () => {
+    expect(
+      resolveSimulationModelFromOptions({ modelId: 'standard-360', horizonDays: 720 })
+    ).toEqual({ modelId: 'standard-360', horizonDays: 720 });
+  });
+});
 
 describe('recommendSimulatorModel', () => {
   it('es determinista para las mismas mediciones', () => {
