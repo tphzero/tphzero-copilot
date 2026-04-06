@@ -6,17 +6,20 @@ import { DatasetNavTree } from '@/components/layout/dataset-nav-tree';
 
 export function DatasetLayoutShell({
   datasetId,
+  datasetName,
   children,
 }: {
   datasetId: string;
+  /** `datasets.name` from DB; null if missing (e.g. invalid id). */
+  datasetName: string | null;
   children: ReactNode;
 }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <DatasetBreadcrumbs datasetId={datasetId} />
+      <DatasetBreadcrumbs datasetId={datasetId} datasetName={datasetName} />
       <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 md:flex-row md:items-start md:gap-6 md:p-6">
         <aside className="w-full shrink-0 md:sticky md:top-0 md:w-56 md:self-start">
-          <DatasetNavTree datasetId={datasetId} />
+          <DatasetNavTree datasetId={datasetId} datasetName={datasetName} />
         </aside>
         <div className="min-w-0 flex-1 pb-4 md:pb-6">{children}</div>
       </div>

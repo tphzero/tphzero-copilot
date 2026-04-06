@@ -14,7 +14,13 @@ import {
 } from '@/lib/navigation/routes';
 import { cn } from '@/lib/utils';
 
-export function DatasetNavTree({ datasetId }: { datasetId: string }) {
+export function DatasetNavTree({
+  datasetId,
+  datasetName,
+}: {
+  datasetId: string;
+  datasetName: string | null;
+}) {
   const pathname = usePathname();
   const [biopilaIds, setBiopilaIds] = useState<string[]>([]);
 
@@ -41,15 +47,21 @@ export function DatasetNavTree({ datasetId }: { datasetId: string }) {
   const dashPath = datasetDashboardPath(datasetId);
   const dashActive = pathname === dashPath || pathname.endsWith('/dashboard');
 
-  const truncated = truncateDatasetId(datasetId);
+  const idFallback = truncateDatasetId(datasetId);
+  const heading = datasetName ?? idFallback;
+  const headingTitle = datasetName ? `${datasetName} · ${datasetId}` : datasetId;
 
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
       <p
-        className="mb-2 font-mono text-xs font-medium text-zinc-300"
-        title={datasetId}
+        className={cn(
+          'mb-2 text-xs font-medium text-zinc-300',
+          datasetName ? '' : 'font-mono',
+          'min-w-0 truncate'
+        )}
+        title={headingTitle}
       >
-        {truncated}
+        {heading}
       </p>
       <ul className="space-y-1">
         <li>
