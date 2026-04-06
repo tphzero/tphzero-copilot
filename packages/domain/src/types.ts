@@ -59,6 +59,10 @@ export interface SimulationResult {
   simulated: { tphProjected: number[]; days: number[] };
   deltaReductionPct: number;
   estimatedTimeSavedDays: number | null;
+  /** Identificador del modelo de simulacion usado (registro en cliente). */
+  modelId: string;
+  /** Horizonte de proyeccion en dias (alineado con el modelo seleccionado). */
+  horizonDays: number;
 }
 
 export interface CorrelationResult {

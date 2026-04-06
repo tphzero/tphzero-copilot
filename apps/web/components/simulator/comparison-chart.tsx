@@ -1,8 +1,8 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import {
   CartesianGrid,
-  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -11,6 +11,18 @@ import {
   YAxis,
 } from 'recharts';
 import type { SimulationResult } from '@tphzero/domain';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  filterSeriesByTimePreset,
+  type TimeRangePreset,
+} from '@/lib/models/simulator-chart-range';
 
 function formatTooltipValue(
   value: number | string | readonly (number | string)[] | undefined,
@@ -18,57 +30,166 @@ function formatTooltipValue(
 ) {
   const rawValue = Array.isArray(value) ? value[0] : value;
   const numericValue = typeof rawValue === 'number' ? rawValue : Number(rawValue ?? 0);
-  return [`${numericValue.toLocaleString()} mg/kg`, label] as const;
+  return [`${Math.round(numericValue).toLocaleString('es')} mg/kg`, label] as const;
 }
 
+function formatYTick(value: number) {
+  if (Math.abs(value) >= 1000) {
+    return `${(value / 1000).toFixed(0)}k`;
+  }
+  return `${Math.round(value)}`;
+}
+
+const PRESET_LABELS: { id: TimeRangePreset; label: string }[] = [
+  { id: 'full', label: 'Todo el horizonte proyectado' },
+  { id: 'last180', label: 'Ultimos 180 dias' },
+  { id: 'last90', label: 'Ultimos 90 dias' },
+  { id: 'last30', label: 'Ultimos 30 dias' },
+];
+
 export function ComparisonChart({ result }: { result: SimulationResult }) {
-  const data = result.baseline.days.map((day, index) => ({
-    dia: day,
-    'Linea base': Math.round(result.baseline.tphProjected[index] ?? 0),
-    Simulado: Math.round(result.simulated.tphProjected[index] ?? 0),
-  }));
+  const [preset, setPreset] = useState<TimeRangePreset>('full');
+  const [showBaseline, setShowBaseline] = useState(true);
+  const [showSimulated, setShowSimulated] = useState(true);
+
+  const filtered = useMemo(() => {
+    return filterSeriesByTimePreset(
+      result.baseline.days,
+      result.baseline.tphProjected,
+      result.simulated.tphProjected,
+      preset
+    );
+  }, [result, preset]);
+
+  const data = useMemo(() => {
+    return filtered.days.map((day, index) => ({
+      dia: day,
+      baseline: Math.round(filtered.baseline[index] ?? 0),
+      simulado: Math.round(filtered.simulated[index] ?? 0),
+    }));
+  }, [filtered]);
+
+  const empty = data.length === 0;
 
   return (
-    <ResponsiveContainer width="100%" height={350}>
-      <LineChart data={data}>
-        <CartesianGrid stroke="#27272a" strokeDasharray="3 3" />
-        <XAxis
-          dataKey="dia"
-          stroke="#71717a"
-          fontSize={12}
-          label={{ value: 'Dias', position: 'bottom', fill: '#71717a' }}
-        />
-        <YAxis
-          stroke="#71717a"
-          fontSize={12}
-          tickFormatter={(value: number) => `${(value / 1000).toFixed(0)}k`}
-        />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: '#18181b',
-            border: '1px solid #3f3f46',
-            borderRadius: '8px',
-          }}
-          labelFormatter={(value) => `Dia ${value}`}
-          formatter={(value, name) => formatTooltipValue(value, String(name))}
-        />
-        <Legend />
-        <Line
-          type="monotone"
-          dataKey="Linea base"
-          stroke="#71717a"
-          strokeWidth={2}
-          strokeDasharray="5 5"
-          dot={false}
-        />
-        <Line
-          type="monotone"
-          dataKey="Simulado"
-          stroke="#10b981"
-          strokeWidth={2}
-          dot={false}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <div className="space-y-1">
+          <Label className="text-xs text-zinc-500">Rango temporal (vista)</Label>
+          <Select
+            value={preset}
+            onValueChange={(v) => setPreset((v as TimeRangePreset) ?? 'full')}
+          >
+            <SelectTrigger className="w-full border-zinc-700 bg-zinc-800 sm:w-[220px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PRESET_LABELS.map(({ id, label }) => (
+                <SelectItem key={id} value={id}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex flex-wrap gap-4">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-300">
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-zinc-600 bg-zinc-800"
+              checked={showBaseline}
+              onChange={(e) => setShowBaseline(e.target.checked)}
+            />
+            <span
+              className="h-0 w-8 shrink-0 border-t-2 border-dashed border-zinc-400"
+              aria-hidden
+            />
+            <span>Linea base</span>
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-300">
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-zinc-600 bg-zinc-800"
+              checked={showSimulated}
+              onChange={(e) => setShowSimulated(e.target.checked)}
+            />
+            <span className="h-0 w-8 shrink-0 border-t-2 border-emerald-400" aria-hidden />
+            <span>Proyeccion simulada</span>
+          </label>
+        </div>
+      </div>
+
+      {empty ? (
+        <div className="flex h-[280px] items-center justify-center rounded border border-dashed border-zinc-700 bg-zinc-950/50">
+          <p className="text-sm text-zinc-500">No hay puntos en este rango.</p>
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={350}>
+          <LineChart
+            data={data}
+            margin={{ top: 8, right: 12, bottom: 8, left: 4 }}
+          >
+            <CartesianGrid stroke="#27272a" strokeDasharray="3 3" />
+            <XAxis
+              dataKey="dia"
+              stroke="#71717a"
+              fontSize={12}
+              tickMargin={8}
+              height={52}
+              label={{
+                value: 'Tiempo (dias desde inicio)',
+                position: 'insideBottom',
+                fill: '#a1a1aa',
+                offset: -4,
+              }}
+            />
+            <YAxis
+              stroke="#71717a"
+              fontSize={12}
+              tickFormatter={formatYTick}
+              label={{
+                value: 'TPH (mg/kg)',
+                angle: -90,
+                position: 'insideLeft',
+                fill: '#71717a',
+              }}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#18181b',
+                border: '1px solid #3f3f46',
+                borderRadius: '8px',
+              }}
+              labelFormatter={(value) => `Dia ${value}`}
+              formatter={(value, name) => formatTooltipValue(value, String(name))}
+            />
+            {showBaseline ? (
+              <Line
+                type="monotone"
+                dataKey="baseline"
+                name="Linea base"
+                stroke="#a1a1aa"
+                strokeWidth={2}
+                strokeDasharray="6 4"
+                dot={false}
+                isAnimationActive={false}
+              />
+            ) : null}
+            {showSimulated ? (
+              <Line
+                type="monotone"
+                dataKey="simulado"
+                name="Proyeccion simulada"
+                stroke="#34d399"
+                strokeWidth={2.5}
+                dot={false}
+                isAnimationActive={false}
+              />
+            ) : null}
+          </LineChart>
+        </ResponsiveContainer>
+      )}
+    </div>
   );
 }

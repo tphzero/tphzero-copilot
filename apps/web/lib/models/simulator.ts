@@ -1,6 +1,8 @@
 import type { Measurement, SimulationResult } from '@tphzero/domain';
-import { classifyBiopilaState } from '@tphzero/domain';
+import { classifyBiopilaState, TPH_REDUCTION_TARGET } from '@tphzero/domain';
 import { predictTPH } from './predictor';
+import { firstDayWhereTphAtOrBelow } from './simulator-explain-metrics';
+import { resolveSimulatorHorizonDays } from './simulator-models';
 
 export interface SimulationParams {
   humedadSueloPct?: number;
@@ -12,18 +14,28 @@ export interface SimulationParams {
   frecuenciaVolteoDias?: number;
 }
 
+export interface SimulateScenarioOptions {
+  /** Horizonte en dias; si se omite, se deduce de `modelId`. */
+  horizonDays?: number;
+  /** Debe existir en el registro de modelos salvo que se pase `horizonDays` explicito. */
+  modelId?: string;
+}
+
 /**
- * Simple what-if simulator: adjusts measurement variables and re-runs prediction.
- *
- * This is a heuristic approach: we modify the historical data points with
- * the delta between current and simulated values, then re-fit the prediction model.
- * This gives a rough estimate of how changes would affect the TPH curve.
+ * What-if: se sustituyen variables operativas en el historial y se vuelve a ajustar k
+ * con predictTPH sobre esas mediciones modificadas. La linea base usa el historial original.
+ * El factor de optimalidad escala la reduccion proyectada cuando el estado clasificado mejora
+ * (mismo criterio que antes, pero aplicado sobre la proyeccion obtenida con datos modificados).
  */
 export function simulateScenario(
   measurements: Measurement[],
   params: SimulationParams,
-  horizonDays: number = 360
+  options?: SimulateScenarioOptions
 ): SimulationResult {
+  const modelId = options?.modelId ?? 'standard-360';
+  const horizonDays =
+    options?.horizonDays ?? resolveSimulatorHorizonDays(modelId);
+
   const baseline = predictTPH(measurements, horizonDays);
 
   const modified = measurements.map((m) => ({
@@ -39,22 +51,68 @@ export function simulateScenario(
 
   const adjustmentFactor = calculateOptimalityBoost(measurements, modified);
 
-  const simulated = predictTPH(measurements, horizonDays);
+  const simulatedFromModified = predictTPH(modified, horizonDays);
 
-  const adjustedTph = simulated.tphProjected.map((tph) => {
+  const adjustedTph = simulatedFromModified.tphProjected.map((tph) => {
     const tphInitial = measurements[0]?.tphInicialMgkg ?? tph;
     const reduction = (tphInitial - tph) / tphInitial;
     const boostedReduction = Math.min(1, reduction * adjustmentFactor);
     return Math.max(0, tphInitial * (1 - boostedReduction));
   });
 
-  const lastBaseline =
-    baseline.tphProjected[baseline.tphProjected.length - 1] ?? 0;
-  const lastSimulated = adjustedTph[adjustedTph.length - 1] ?? 0;
   const tphInitial = measurements[0]?.tphInicialMgkg ?? 1;
 
-  const baselineReduction = (tphInitial - lastBaseline) / tphInitial;
-  const simulatedReduction = (tphInitial - lastSimulated) / tphInitial;
+  const baseTph = baseline.tphProjected;
+  const simTph = adjustedTph;
+  const daysAligned = simulatedFromModified.daysProjected;
+  const len = Math.min(
+    baseTph.length,
+    simTph.length,
+    daysAligned.length
+  );
+
+  /**
+   * Ventaja maxima del simulado sobre la base: maximo en el tiempo de
+   * (reduccion_sim - reduccion_base) en puntos porcentuales del TPH inicial.
+   * Evita el artefacto de comparar solo el ultimo dia (donde ambas curvas suelen
+   * converger cerca del 100% de reduccion y la diferencia es casi nula).
+   */
+  let maxDeltaReductionPp = 0;
+  if (tphInitial > 0 && len > 0) {
+    for (let i = 0; i < len; i++) {
+      const b = baseTph[i] ?? 0;
+      const s = simTph[i] ?? 0;
+      const rb = (tphInitial - b) / tphInitial;
+      const rs = (tphInitial - s) / tphInitial;
+      maxDeltaReductionPp = Math.max(maxDeltaReductionPp, rs - rb);
+    }
+  }
+
+  /**
+   * Tiempo ahorrado: diferencia en dias hasta alcanzar el TPH objetivo de
+   * "90% de reduccion" (TPH_REDUCTION_TARGET) sobre las curvas proyectadas.
+   * El estimador exponencial estimatedDaysTo90Pct no sirve para what-if porque
+   * k no cambia al mover sliders (solo cambia la curva ajustada por boost).
+   */
+  const targetTphMgkg =
+    tphInitial > 0 ? tphInitial * (1 - TPH_REDUCTION_TARGET) : 0;
+  const daysSlice = daysAligned.slice(0, len);
+  const baseSlice = baseTph.slice(0, len);
+  const simSlice = simTph.slice(0, len);
+
+  const dayBaselineTarget =
+    tphInitial > 0
+      ? firstDayWhereTphAtOrBelow(daysSlice, baseSlice, targetTphMgkg)
+      : null;
+  const daySimulatedTarget =
+    tphInitial > 0
+      ? firstDayWhereTphAtOrBelow(daysSlice, simSlice, targetTphMgkg)
+      : null;
+
+  const estimatedTimeSavedDays =
+    dayBaselineTarget != null && daySimulatedTarget != null
+      ? Math.round(dayBaselineTarget - daySimulatedTarget)
+      : null;
 
   return {
     baseline: {
@@ -63,15 +121,13 @@ export function simulateScenario(
     },
     simulated: {
       tphProjected: adjustedTph,
-      days: simulated.daysProjected,
+      days: simulatedFromModified.daysProjected,
     },
     deltaReductionPct:
-      Math.round((simulatedReduction - baselineReduction) * 10000) / 100,
-    estimatedTimeSavedDays:
-      baseline.estimatedDaysTo90Pct && simulated.estimatedDaysTo90Pct
-        ? baseline.estimatedDaysTo90Pct -
-          Math.round(simulated.estimatedDaysTo90Pct / adjustmentFactor)
-        : null,
+      Math.round(maxDeltaReductionPp * 10000) / 100,
+    estimatedTimeSavedDays,
+    modelId,
+    horizonDays,
   };
 }
 

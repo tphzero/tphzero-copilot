@@ -130,14 +130,28 @@ export const aiTools = {
       fertilizanteP: z.number().optional().describe('Nuevo fertilizante P.'),
       fertilizanteK: z.number().optional().describe('Nuevo fertilizante K.'),
       frecuenciaVolteoDias: z.number().optional().describe('Nueva frecuencia de volteo en dias.'),
+      modelId: z
+        .string()
+        .optional()
+        .describe('ID del modelo de simulacion (p. ej. standard-360, conservative-180).'),
+      horizonDays: z
+        .number()
+        .int()
+        .positive()
+        .max(720)
+        .optional()
+        .describe('Horizonte de proyeccion en dias (alternativa a modelId).'),
     }),
-    execute: async ({ biopilaId, ...params }) => {
+    execute: async ({ biopilaId, modelId, horizonDays, ...params }) => {
       const measurements = await getLatestMeasurements(biopilaId);
       if (measurements.length < 2) {
         return { error: 'Datos insuficientes para simular.' };
       }
 
-      return simulateScenario(measurements, params);
+      return simulateScenario(measurements, params, {
+        modelId,
+        horizonDays,
+      });
     },
   }),
 

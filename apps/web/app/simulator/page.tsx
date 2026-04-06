@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Play, RotateCcw } from 'lucide-react';
-import type { Measurement, SimulationResult } from '@tphzero/domain';
+import { RotateCcw } from 'lucide-react';
+import type { Measurement } from '@tphzero/domain';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,12 +15,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ActiveModelPanel } from '@/components/simulator/active-model-panel';
 import { ComparisonChart } from '@/components/simulator/comparison-chart';
+import { SimulatorExplanation } from '@/components/simulator/simulator-explanation';
 import { VariableSliders } from '@/components/simulator/variable-sliders';
 import { simulateScenario } from '@/lib/models/simulator';
+import {
+  getSimulatorModelById,
+  recommendSimulatorModel,
+  SIMULATOR_MODELS,
+} from '@/lib/models/simulator-models';
 import { useActiveDataset } from '@/lib/context/dataset-context';
 
 type SimulatorValues = Record<string, number>;
+
+const PARAM_KEYS = [
+  'humedadSueloPct',
+  'temperaturaSueloC',
+  'oxigenoPct',
+  'fertilizanteN',
+  'fertilizanteP',
+  'fertilizanteK',
+  'frecuenciaVolteoDias',
+] as const satisfies readonly (keyof SimulatorValues)[];
 
 function getValuesFromMeasurement(measurement: Measurement): SimulatorValues {
   return {
@@ -32,6 +49,22 @@ function getValuesFromMeasurement(measurement: Measurement): SimulatorValues {
     fertilizanteK: measurement.fertilizanteK,
     frecuenciaVolteoDias: measurement.frecuenciaVolteoDias,
   };
+}
+
+function getAdjustedParamKeys(
+  values: SimulatorValues,
+  base: Measurement | undefined
+): string[] {
+  if (!base) return [];
+  const out: string[] = [];
+  for (const key of PARAM_KEYS) {
+    const v = values[key];
+    const b = base[key as keyof Measurement];
+    if (typeof v === 'number' && typeof b === 'number' && Math.abs(v - b) > 1e-5) {
+      out.push(key);
+    }
+  }
+  return out;
 }
 
 export default function SimulatorPage() {
@@ -48,7 +81,8 @@ export default function SimulatorPage() {
     fertilizanteK: 20,
     frecuenciaVolteoDias: 30,
   });
-  const [result, setResult] = useState<SimulationResult | null>(null);
+  const [selectedModelId, setSelectedModelId] = useState('standard-360');
+  const [explanationStale, setExplanationStale] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -125,6 +159,13 @@ export default function SimulatorPage() {
     [allMeasurements, selectedBiopila]
   );
 
+  const recommendation = useMemo(() => {
+    if (selectedMeasurements.length < 2) {
+      return { modelId: 'standard-360' as const, reason: '' };
+    }
+    return recommendSimulatorModel(selectedMeasurements);
+  }, [selectedMeasurements]);
+
   useEffect(() => {
     if (!selectedBiopila) return;
 
@@ -132,20 +173,40 @@ export default function SimulatorPage() {
     if (!latestMeasurement) return;
 
     setValues(getValuesFromMeasurement(latestMeasurement));
-    setResult(null);
   }, [selectedBiopila, selectedMeasurements]);
 
-  const runSimulation = () => {
-    if (selectedMeasurements.length < 2) return;
-    setResult(simulateScenario(selectedMeasurements, values));
-  };
+  useEffect(() => {
+    const scoped = allMeasurements
+      .filter((measurement) => measurement.biopilaId === selectedBiopila)
+      .sort((a, b) => a.tiempoDias - b.tiempoDias);
+    if (scoped.length < 2) {
+      return;
+    }
+    setSelectedModelId(recommendSimulatorModel(scoped).modelId);
+  }, [selectedBiopila, activeDataset?.id, allMeasurements]);
+
+  const result = useMemo(() => {
+    if (selectedMeasurements.length < 2) return null;
+    return simulateScenario(selectedMeasurements, values, { modelId: selectedModelId });
+  }, [selectedMeasurements, values, selectedModelId]);
+
+  useEffect(() => {
+    setExplanationStale(true);
+  }, [values, selectedModelId, selectedBiopila, activeDataset?.id, selectedMeasurements]);
+
+  const latestMeasurement = selectedMeasurements[selectedMeasurements.length - 1];
+
+  const adjustedParamKeys = useMemo(
+    () => getAdjustedParamKeys(values, latestMeasurement),
+    [values, latestMeasurement]
+  );
+
+  const modelMeta = getSimulatorModelById(selectedModelId) ?? SIMULATOR_MODELS[1]!;
 
   const resetValues = () => {
-    const latestMeasurement = selectedMeasurements[selectedMeasurements.length - 1];
     if (!latestMeasurement) return;
-
     setValues(getValuesFromMeasurement(latestMeasurement));
-    setResult(null);
+    setExplanationStale(true);
   };
 
   if (loading) {
@@ -190,14 +251,13 @@ export default function SimulatorPage() {
     );
   }
 
-  const latestMeasurement = selectedMeasurements[selectedMeasurements.length - 1];
-
   return (
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-2xl font-bold">Simulador What-If</h1>
         <p className="text-sm text-zinc-400">
-          Modifica variables operativas y observa como cambia la proyeccion de TPH.
+          Modifica variables operativas y observa como cambia la proyeccion de TPH. La
+          comparacion se recalcula al mover controles o cambiar el modelo.
         </p>
       </div>
 
@@ -244,19 +304,12 @@ export default function SimulatorPage() {
 
             <div className="flex gap-2 pt-2">
               <Button
-                onClick={runSimulation}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                disabled={selectedMeasurements.length < 2}
-              >
-                <Play className="mr-2 h-4 w-4" />
-                Simular
-              </Button>
-              <Button
                 onClick={resetValues}
                 variant="outline"
-                className="border-zinc-700"
+                className="flex-1 border-zinc-700"
               >
-                <RotateCcw className="h-4 w-4" />
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Restablecer a ultima medicion
               </Button>
             </div>
 
@@ -269,44 +322,79 @@ export default function SimulatorPage() {
         </Card>
 
         <div className="space-y-6 xl:col-span-2">
-          {result ? (
+          {selectedMeasurements.length >= 2 ? (
             <>
-              <Card className="border-zinc-800 bg-zinc-900">
-                <CardHeader>
-                  <CardTitle>Comparacion: Linea base vs. Simulado</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ComparisonChart result={result} />
-                </CardContent>
-              </Card>
+              <ActiveModelPanel
+                models={SIMULATOR_MODELS}
+                selectedId={selectedModelId}
+                recommendedId={recommendation.modelId}
+                recommendationReason={recommendation.reason}
+                onModelChange={(id) => setSelectedModelId(id)}
+              />
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Card className="border-zinc-800 bg-zinc-900">
-                  <CardContent className="pt-6">
-                    <p className="text-xs text-zinc-500">Mejora en reduccion</p>
-                    <p className="mt-1 font-mono text-2xl font-bold text-emerald-400">
-                      {result.deltaReductionPct >= 0 ? '+' : ''}
-                      {result.deltaReductionPct.toFixed(1)}%
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="border-zinc-800 bg-zinc-900">
-                  <CardContent className="pt-6">
-                    <p className="text-xs text-zinc-500">Tiempo ahorrado</p>
-                    <p className="mt-1 font-mono text-2xl font-bold text-blue-400">
-                      {result.estimatedTimeSavedDays !== null
-                        ? `${result.estimatedTimeSavedDays} dias`
-                        : 'N/A'}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
+              {result ? (
+                <>
+                  <Card className="border-zinc-800 bg-zinc-900">
+                    <CardHeader>
+                      <CardTitle>Comparacion: linea base vs. simulado</CardTitle>
+                      <p className="text-xs text-zinc-500">
+                        Horizonte de proyeccion: {result.horizonDays} dias (modelo{' '}
+                        {result.modelId}).
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <ComparisonChart result={result} />
+                    </CardContent>
+                  </Card>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Card className="border-zinc-800 bg-zinc-900">
+                      <CardContent className="pt-6">
+                        <p className="text-xs text-zinc-500">Ventaja maxima en reduccion</p>
+                        <p className="mt-1 font-mono text-2xl font-bold text-emerald-400">
+                          {result.deltaReductionPct >= 0 ? '+' : ''}
+                          {result.deltaReductionPct.toFixed(1)} pp
+                        </p>
+                        <p className="mt-2 text-xs leading-snug text-zinc-600">
+                          Maximo a lo largo de la curva (pp del TPH inicial): donde el simulado
+                          mas se separa de la base.
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-zinc-800 bg-zinc-900">
+                      <CardContent className="pt-6">
+                        <p className="text-xs text-zinc-500">Tiempo ahorrado (estimado)</p>
+                        <p className="mt-1 font-mono text-2xl font-bold text-blue-400">
+                          {result.estimatedTimeSavedDays !== null
+                            ? `${result.estimatedTimeSavedDays} dias`
+                            : 'N/A'}
+                        </p>
+                        <p className="mt-2 text-xs leading-snug text-zinc-600">
+                          Dias antes de alcanzar el 90% de reduccion de TPH respecto al inicial
+                          (misma meta que el modelo), comparando curvas proyectadas.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {activeDataset ? (
+                    <SimulatorExplanation
+                      datasetId={activeDataset.id}
+                      biopilaId={selectedBiopila}
+                      modelMeta={modelMeta}
+                      result={result}
+                      adjustedParamKeys={adjustedParamKeys}
+                      explanationStale={explanationStale}
+                      onGenerationSuccess={() => setExplanationStale(false)}
+                    />
+                  ) : null}
+                </>
+              ) : null}
             </>
           ) : (
             <Card className="flex h-64 items-center justify-center border-zinc-800 bg-zinc-900">
               <p className="max-w-md text-center text-zinc-500">
-                Ajusta las variables y presiona Simular para comparar la proyeccion
-                base con un escenario operativo alternativo.
+                Se necesitan al menos dos mediciones para esta biopila.
               </p>
             </Card>
           )}
