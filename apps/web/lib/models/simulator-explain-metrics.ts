@@ -25,10 +25,11 @@ export function firstDayWhereTphAtOrBelow(
 }
 
 export interface SimulatorSeriesFacts {
-  tphInicialSerieMgkg: number;
-  ultimoDiaEnSerie: number;
-  tphFinalLineaBaseMgkg: number;
-  tphFinalSimuladoMgkg: number;
+  /** null si no hay puntos en la proyeccion (evita inventar ceros). */
+  tphInicialSerieMgkg: number | null;
+  ultimoDiaEnSerie: number | null;
+  tphFinalLineaBaseMgkg: number | null;
+  tphFinalSimuladoMgkg: number | null;
   /** Primer día con TPH simulado ≤ umbral (p. ej. primera vez que toca ~0 en el gráfico). */
   primerDiaSimuladoTphCasiNulo: number | null;
   umbralTphCasiNuloMgkg: number;
@@ -66,16 +67,18 @@ export function buildSimulatorSeriesFacts(result: SimulationResult): SimulatorSe
 
   const idxLast = len > 0 ? len - 1 : 0;
   const ultimoDiaEnSerie =
-    len > 0 ? (daysS[idxLast] ?? daysB[idxLast] ?? 0) : 0;
-  const tphFinalLineaBaseMgkg = len > 0 ? (baseTph[idxLast] ?? 0) : 0;
-  const tphFinalSimuladoMgkg = len > 0 ? (simTph[idxLast] ?? 0) : 0;
-  const tphInicialSerieMgkg = len > 0 ? (baseTph[0] ?? simTph[0] ?? 0) : 0;
+    len > 0 ? (daysS[idxLast] ?? daysB[idxLast] ?? null) : null;
+  const tphFinalLineaBaseMgkg =
+    len > 0 ? (baseTph[idxLast] ?? null) : null;
+  const tphFinalSimuladoMgkg =
+    len > 0 ? (simTph[idxLast] ?? null) : null;
+  const tphInicialSerieMgkg =
+    len > 0 ? (baseTph[0] ?? simTph[0] ?? null) : null;
 
-  const primerDiaSimuladoTphCasiNulo = firstDayWhereTphAtOrBelow(
-    daysSSlice,
-    simTphSlice,
-    TPH_CASI_CERO_MGKG
-  );
+  const primerDiaSimuladoTphCasiNulo =
+    len > 0
+      ? firstDayWhereTphAtOrBelow(daysSSlice, simTphSlice, TPH_CASI_CERO_MGKG)
+      : null;
 
   return {
     tphInicialSerieMgkg,

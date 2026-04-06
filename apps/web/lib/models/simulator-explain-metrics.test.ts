@@ -50,4 +50,28 @@ describe('buildSimulatorSeriesFacts', () => {
     expect(f.primerDiaSimuladoTphCasiNulo).toBe(198);
     expect(f.deltaReduccionAcumuladaPpDelInicial).toBe(0.06);
   });
+
+  it('con series vacias no inventa ceros en hechos de TPH/dia', () => {
+    const empty: SimulationResult = {
+      baseline: { days: [], tphProjected: [] },
+      simulated: { days: [], tphProjected: [] },
+      deltaReductionPct: 0,
+      estimatedTimeSavedDays: null,
+      modelId: 'standard-360',
+      horizonDays: 360,
+      kinetics: {
+        kPerDay: 0,
+        tphInitialMgkg: 1000,
+        effectiveRateMultiplier: 1,
+        referenceTiempoDias: 0,
+        factors: [],
+      },
+    };
+    const f = buildSimulatorSeriesFacts(empty);
+    expect(f.tphInicialSerieMgkg).toBeNull();
+    expect(f.ultimoDiaEnSerie).toBeNull();
+    expect(f.tphFinalLineaBaseMgkg).toBeNull();
+    expect(f.tphFinalSimuladoMgkg).toBeNull();
+    expect(f.primerDiaSimuladoTphCasiNulo).toBeNull();
+  });
 });

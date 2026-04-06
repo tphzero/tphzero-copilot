@@ -40,8 +40,12 @@ export function fitExponentialDecayRate(
 
   const denom = n * sumX2 - sumX * sumX;
   let k = denom !== 0 ? -(n * sumXY - sumX * sumY) / denom : 0;
-  if (!Number.isFinite(k) || k < 1e-12) {
-    k = 1e-12;
+  if (!Number.isFinite(k)) {
+    return null;
+  }
+  /** Sin decaimiento (ajuste plano o pendiente >= 0): no forzar k artificial. */
+  if (k <= 0) {
+    k = 0;
   }
 
   return { kPerDay: k, tphInicialMgkg: tphInitial, validPointCount: n, xs, ys };
@@ -88,7 +92,9 @@ export function predictTPH(
   }
 
   const estimatedDaysTo90Pct =
-    k > 0 ? Math.round(-Math.log(1 - TPH_REDUCTION_TARGET) / k) : null;
+    k > 1e-15
+      ? Math.round(-Math.log(1 - TPH_REDUCTION_TARGET) / k)
+      : null;
 
   const last = validPoints[validPoints.length - 1];
   const first = validPoints[0];

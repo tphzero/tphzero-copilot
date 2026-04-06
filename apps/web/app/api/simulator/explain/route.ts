@@ -86,6 +86,7 @@ export async function POST(req: Request) {
       tphFinalSimuladoMgkg: facts.tphFinalSimuladoMgkg,
       primerDiaSimuladoTphCasiNulo: facts.primerDiaSimuladoTphCasiNulo,
       umbralTphCasiNuloMgkg: facts.umbralTphCasiNuloMgkg,
+      serieProyeccionVacia: facts.tphInicialSerieMgkg === null,
     },
     metricas: {
       deltaReduccionAcumuladaPpDelInicial: facts.deltaReduccionAcumuladaPpDelInicial,
@@ -113,7 +114,7 @@ Tu fuente de verdad son EXCLUSIVAMENTE los numeros y textos del JSON "datos". No
 
 CONTRADICCIONES A EVITAR:
 - NO confundas "horizonteExtraProyeccionModeloDias" con el dia en que el TPH simulado baja a casi cero. El primero es un parametro del modelo; el cruce a casi cero esta en "series.primerDiaSimuladoTphCasiNulo" (primer dia donde TPH simulado <= umbral).
-- "tphFinalSimuladoMgkg" y "tphFinalLineaBaseMgkg" son los valores en el ULTIMO dia de la serie ("ultimoDiaEnSerie"), es decir el final del eje X del grafico, no un dia arbitrario igual al horizonte del modelo.
+- "tphFinalSimuladoMgkg" y "tphFinalLineaBaseMgkg" son los valores en el ULTIMO dia de la serie ("ultimoDiaEnSerie"), es decir el final del eje X del grafico, no un dia arbitrario igual al horizonte del modelo. Si esos campos o "ultimoDiaEnSerie" son null (p. ej. "serieProyeccionVacia": true), no inventes valores de TPH ni dias: indica que no hay proyeccion utilizable.
 - Si "primerDiaSimuladoTphCasiNulo" es un numero (ej. 198) y el horizonte del modelo es otro (ej. 540), debes explicar ambos sin igualarlos.
 
 DELTA DE REDUCCION:

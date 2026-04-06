@@ -94,11 +94,15 @@ export function resolveSimulationModelFromOptions(options?: {
     const meta = getSimulatorModelById(explicitModelId);
     const normalizedId =
       meta != null ? explicitModelId : 'standard-360';
-    const horizon =
-      explicitHorizon ??
-      meta?.horizonDays ??
-      resolveSimulatorHorizonDays(normalizedId);
-    return { modelId: normalizedId, horizonDays: horizon };
+    const metaResolved = getSimulatorModelById(normalizedId)!;
+    const defaultHorizon = metaResolved.horizonDays;
+    const horizon = explicitHorizon ?? defaultHorizon;
+    /** Si el horizonte explicito no coincide con el del modelo registrado, usar id custom-horizon. */
+    const modelIdOut =
+      explicitHorizon != null && explicitHorizon !== defaultHorizon
+        ? 'custom-horizon'
+        : normalizedId;
+    return { modelId: modelIdOut, horizonDays: horizon };
   }
 
   if (explicitHorizon != null) {

@@ -54,10 +54,10 @@ describe('resolveSimulationModelFromOptions', () => {
     });
   });
 
-  it('modelId explicito conserva el id; horizonte puede sobreescribirse', () => {
+  it('modelId explicito con horizonte distinto al del modelo pasa a custom-horizon', () => {
     expect(
       resolveSimulationModelFromOptions({ modelId: 'standard-360', horizonDays: 720 })
-    ).toEqual({ modelId: 'standard-360', horizonDays: 720 });
+    ).toEqual({ modelId: 'custom-horizon', horizonDays: 720 });
   });
 
   it('modelId desconocido se normaliza a standard-360', () => {
@@ -67,10 +67,10 @@ describe('resolveSimulationModelFromOptions', () => {
     });
   });
 
-  it('modelId desconocido con horizonte explicito conserva el horizonte', () => {
+  it('modelId desconocido con horizonte explicito distinto al default usa custom-horizon', () => {
     expect(
       resolveSimulationModelFromOptions({ modelId: 'foo', horizonDays: 720 })
-    ).toEqual({ modelId: 'standard-360', horizonDays: 720 });
+    ).toEqual({ modelId: 'custom-horizon', horizonDays: 720 });
   });
 });
 
