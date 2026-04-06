@@ -3,6 +3,7 @@ import {
   DATASET_ID_MAX_VISIBLE,
   datasetBiopilaPath,
   datasetDashboardPath,
+  datasetIdFromPathname,
   truncateDatasetId,
 } from './routes';
 
@@ -21,6 +22,25 @@ describe('datasetBiopilaPath', () => {
     expect(datasetBiopilaPath('ds-1', 'B1')).toBe(
       '/datasets/ds-1/biopila/B1'
     );
+  });
+});
+
+describe('datasetIdFromPathname', () => {
+  it('returns dataset id from dashboard path', () => {
+    expect(datasetIdFromPathname('/datasets/ds-1/dashboard')).toBe('ds-1');
+  });
+
+  it('returns dataset id from biopila path', () => {
+    expect(datasetIdFromPathname('/datasets/ds-1/biopila/B1')).toBe('ds-1');
+  });
+
+  it('decodes encoded segment', () => {
+    expect(datasetIdFromPathname('/datasets/a%2Fb/dashboard')).toBe('a/b');
+  });
+
+  it('returns null outside dataset routes', () => {
+    expect(datasetIdFromPathname('/')).toBeNull();
+    expect(datasetIdFromPathname('/chat')).toBeNull();
   });
 });
 

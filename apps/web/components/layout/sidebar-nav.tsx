@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useActiveDataset } from '@/lib/context/dataset-context';
 import { useLatestDatasetId } from '@/hooks/use-latest-dataset-id';
-import { datasetDashboardPath } from '@/lib/navigation/routes';
+import { datasetDashboardPath, datasetIdFromPathname } from '@/lib/navigation/routes';
 import { cn } from '@/lib/utils';
 
 const STATIC_NAV = [
@@ -39,7 +39,9 @@ export function SidebarNav() {
   const { activeDataset } = useActiveDataset();
   const { latestDatasetId, loading } = useLatestDatasetId();
 
-  const dashboardTargetId = activeDataset?.id ?? latestDatasetId;
+  const datasetIdFromUrl = datasetIdFromPathname(pathname);
+  const dashboardTargetId =
+    datasetIdFromUrl ?? activeDataset?.id ?? latestDatasetId;
 
   return (
     <aside className="flex h-full w-20 shrink-0 flex-col border-r border-zinc-800 bg-zinc-950/95 px-2 py-4 md:w-56 md:px-3">

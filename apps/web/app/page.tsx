@@ -14,7 +14,8 @@ import type { ActiveDataset, ApiDatasetRow } from '@/lib/types/dataset';
 
 export default function HomePage() {
   const router = useRouter();
-  const { activeDataset, setActiveDataset } = useActiveDataset();
+  const { activeDataset, setActiveDataset, bumpDatasetCatalog } =
+    useActiveDataset();
   const [showUpload, setShowUpload] = useState(false);
   const [history, setHistory] = useState<ApiDatasetRow[]>([]);
   const dropzoneRef = useRef<HTMLDivElement>(null);
@@ -37,6 +38,7 @@ export default function HomePage() {
 
   function handleFileUploaded(dataset: ActiveDataset) {
     setActiveDataset(dataset);
+    bumpDatasetCatalog();
     setShowUpload(false);
     // Prepend to history so the table stays fresh without a refetch
     setHistory((prev) => [
@@ -63,6 +65,7 @@ export default function HomePage() {
     if (activeDataset?.id === id) {
       setActiveDataset(null);
     }
+    bumpDatasetCatalog();
     setHistory((prev) => prev.filter((r) => r.id !== id));
   }
 

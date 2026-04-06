@@ -20,3 +20,14 @@ export function truncateDatasetId(
   if (id.length <= maxChars) return id;
   return `${id.slice(0, maxChars)}…`;
 }
+
+/** First path segment under `/datasets/…` (decoded), or null if not a dataset route. */
+export function datasetIdFromPathname(pathname: string): string | null {
+  const m = pathname.match(/^\/datasets\/([^/]+)(?:\/|$)/);
+  if (!m) return null;
+  try {
+    return decodeURIComponent(m[1]);
+  } catch {
+    return m[1];
+  }
+}
