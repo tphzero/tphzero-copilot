@@ -1,6 +1,10 @@
 import type { Measurement, SimulationResult } from '@tphzero/domain';
-import { classifyBiopilaState } from '@tphzero/domain';
+import { TPH_REDUCTION_TARGET } from '@tphzero/domain';
 import { predictTPH } from './predictor';
+import { firstDayWhereTphAtOrBelow } from './simulator-explain-metrics';
+import { computeOperationalRateMultiplier } from './simulator-kinetics';
+import type { OperationalSliderValues } from './simulator-kinetics';
+import { resolveSimulationModelFromOptions } from './simulator-models';
 
 export interface SimulationParams {
   humedadSueloPct?: number;
@@ -12,49 +16,117 @@ export interface SimulationParams {
   frecuenciaVolteoDias?: number;
 }
 
+export interface SimulateScenarioOptions {
+  /** Horizonte en dias; si se omite, se deduce de `modelId`. */
+  horizonDays?: number;
+  /**
+   * Id de modelo registrado. Si solo se pasa `horizonDays`, se elige el modelo con ese
+   * horizonte o `custom-horizon` si no hay coincidencia (evita `standard-360` con otro horizonte).
+   */
+  modelId?: string;
+}
+
 /**
- * Simple what-if simulator: adjusts measurement variables and re-runs prediction.
- *
- * This is a heuristic approach: we modify the historical data points with
- * the delta between current and simulated values, then re-fit the prediction model.
- * This gives a rough estimate of how changes would affect the TPH curve.
+ * What-if: k se estima del historial (predictTPH / regresion exponencial). La curva simulada
+ * usa k_ef = k * M, donde M es un producto de factores (Q10, Monod, humedad, volteo) comparando
+ * sliders con la ultima medicion. Ver `simulator-kinetics.ts` y textos del panel de modelo.
  */
 export function simulateScenario(
   measurements: Measurement[],
   params: SimulationParams,
-  horizonDays: number = 360
+  options?: SimulateScenarioOptions
 ): SimulationResult {
+  const { modelId, horizonDays } = resolveSimulationModelFromOptions(options);
+
+  if (measurements.length === 0) {
+    return {
+      baseline: { tphProjected: [], days: [] },
+      simulated: { tphProjected: [], days: [] },
+      deltaReductionPct: 0,
+      estimatedTimeSavedDays: null,
+      modelId,
+      horizonDays,
+      kinetics: {
+        kPerDay: 0,
+        tphInitialMgkg: 0,
+        effectiveRateMultiplier: 1,
+        referenceTiempoDias: 0,
+        factors: [],
+      },
+    };
+  }
+
+  const sorted = [...measurements].sort((a, b) => a.tiempoDias - b.tiempoDias);
+  const reference = sorted[sorted.length - 1]!;
+
   const baseline = predictTPH(measurements, horizonDays);
 
-  const modified = measurements.map((m) => ({
-    ...m,
-    humedadSueloPct: params.humedadSueloPct ?? m.humedadSueloPct,
-    temperaturaSueloC: params.temperaturaSueloC ?? m.temperaturaSueloC,
-    oxigenoPct: params.oxigenoPct ?? m.oxigenoPct,
-    fertilizanteN: params.fertilizanteN ?? m.fertilizanteN,
-    fertilizanteP: params.fertilizanteP ?? m.fertilizanteP,
-    fertilizanteK: params.fertilizanteK ?? m.fertilizanteK,
-    frecuenciaVolteoDias: params.frecuenciaVolteoDias ?? m.frecuenciaVolteoDias,
-  }));
+  const sliderParams: OperationalSliderValues = params;
 
-  const adjustmentFactor = calculateOptimalityBoost(measurements, modified);
+  const { multiplier: M, factors } = computeOperationalRateMultiplier(
+    reference,
+    sliderParams
+  );
 
-  const simulated = predictTPH(measurements, horizonDays);
+  const k = baseline.kFit?.kPerDay ?? 0;
+  const tphInitial = baseline.kFit?.tphInicialMgkg ?? reference.tphInicialMgkg;
 
-  const adjustedTph = simulated.tphProjected.map((tph) => {
-    const tphInitial = measurements[0]?.tphInicialMgkg ?? tph;
-    const reduction = (tphInitial - tph) / tphInitial;
-    const boostedReduction = Math.min(1, reduction * adjustmentFactor);
-    return Math.max(0, tphInitial * (1 - boostedReduction));
-  });
+  if (!baseline.daysProjected.length || !baseline.kFit) {
+    return {
+      baseline: { tphProjected: [], days: [] },
+      simulated: { tphProjected: [], days: [] },
+      deltaReductionPct: 0,
+      estimatedTimeSavedDays: null,
+      modelId,
+      horizonDays,
+      kinetics: {
+        kPerDay: 0,
+        tphInitialMgkg: reference.tphInicialMgkg,
+        effectiveRateMultiplier: M,
+        referenceTiempoDias: reference.tiempoDias,
+        factors,
+      },
+    };
+  }
 
-  const lastBaseline =
-    baseline.tphProjected[baseline.tphProjected.length - 1] ?? 0;
-  const lastSimulated = adjustedTph[adjustedTph.length - 1] ?? 0;
-  const tphInitial = measurements[0]?.tphInicialMgkg ?? 1;
+  const daysAligned = baseline.daysProjected;
+  const baseTph = baseline.tphProjected;
+  const simTph = daysAligned.map((d) =>
+    Math.max(0, tphInitial * Math.exp(-k * M * d))
+  );
 
-  const baselineReduction = (tphInitial - lastBaseline) / tphInitial;
-  const simulatedReduction = (tphInitial - lastSimulated) / tphInitial;
+  const len = Math.min(baseTph.length, simTph.length, daysAligned.length);
+
+  let maxDeltaReductionPp = 0;
+  if (tphInitial > 0 && len > 0) {
+    for (let i = 0; i < len; i++) {
+      const b = baseTph[i] ?? 0;
+      const s = simTph[i] ?? 0;
+      const rb = (tphInitial - b) / tphInitial;
+      const rs = (tphInitial - s) / tphInitial;
+      maxDeltaReductionPp = Math.max(maxDeltaReductionPp, rs - rb);
+    }
+  }
+
+  const targetTphMgkg =
+    tphInitial > 0 ? tphInitial * (1 - TPH_REDUCTION_TARGET) : 0;
+  const daysSlice = daysAligned.slice(0, len);
+  const baseSlice = baseTph.slice(0, len);
+  const simSlice = simTph.slice(0, len);
+
+  const dayBaselineTarget =
+    tphInitial > 0
+      ? firstDayWhereTphAtOrBelow(daysSlice, baseSlice, targetTphMgkg)
+      : null;
+  const daySimulatedTarget =
+    tphInitial > 0
+      ? firstDayWhereTphAtOrBelow(daysSlice, simSlice, targetTphMgkg)
+      : null;
+
+  const estimatedTimeSavedDays =
+    dayBaselineTarget != null && daySimulatedTarget != null
+      ? Math.round(dayBaselineTarget - daySimulatedTarget)
+      : null;
 
   return {
     baseline: {
@@ -62,37 +134,19 @@ export function simulateScenario(
       days: baseline.daysProjected,
     },
     simulated: {
-      tphProjected: adjustedTph,
-      days: simulated.daysProjected,
+      tphProjected: simTph,
+      days: daysAligned,
     },
-    deltaReductionPct:
-      Math.round((simulatedReduction - baselineReduction) * 10000) / 100,
-    estimatedTimeSavedDays:
-      baseline.estimatedDaysTo90Pct && simulated.estimatedDaysTo90Pct
-        ? baseline.estimatedDaysTo90Pct -
-          Math.round(simulated.estimatedDaysTo90Pct / adjustmentFactor)
-        : null,
+    deltaReductionPct: Math.round(maxDeltaReductionPp * 10000) / 100,
+    estimatedTimeSavedDays,
+    modelId,
+    horizonDays,
+    kinetics: {
+      kPerDay: k,
+      tphInitialMgkg: tphInitial,
+      effectiveRateMultiplier: M,
+      referenceTiempoDias: reference.tiempoDias,
+      factors,
+    },
   };
-}
-
-/**
- * Calculate how much closer to optimal the modified measurements are.
- * Returns a factor >= 1.0 (1.0 = no change, >1 = improvement).
- */
-function calculateOptimalityBoost(
-  original: Measurement[],
-  modified: Measurement[]
-): number {
-  let originalScore = 0;
-  let modifiedScore = 0;
-
-  const stateScore = { optimo: 3, suboptimo: 2, critico: 1 };
-
-  for (let i = 0; i < original.length; i++) {
-    originalScore += stateScore[classifyBiopilaState(original[i])];
-    modifiedScore += stateScore[classifyBiopilaState(modified[i])];
-  }
-
-  if (originalScore === 0) return 1;
-  return Math.max(1, modifiedScore / originalScore);
 }

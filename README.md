@@ -102,7 +102,7 @@ El endpoint `/api/chat` usa AI SDK v6 con tools server-side para:
 
 ### 5. Simulador
 
-El simulador toma una biopila del dataset mas reciente, inicializa sliders con la ultima medicion y ejecuta un escenario alternativo usando el modelo heuristico de `simulateScenario`.
+El simulador toma una biopila del dataset mas reciente, inicializa sliders con la ultima medicion y proyecta TPH con cinética exponencial ajustada al historial; el escenario simulado escala la tasa con factores operativos (Q10, Monod, humedad, volteo) respecto a esa medicion. Ver `simulateScenario` y `simulator-kinetics.ts`.
 
 ## Variables de entorno
 
