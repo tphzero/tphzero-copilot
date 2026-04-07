@@ -34,6 +34,19 @@ function baseMeasurement(overrides: Partial<Measurement> = {}): Measurement {
 }
 
 describe('simulateScenario', () => {
+  it('con mediciones vacias no lanza y devuelve series vacias (Codex: sin reference)', () => {
+    expect(() => simulateScenario([], {}, { modelId: 'standard-360' })).not.toThrow();
+    const r = simulateScenario([], {}, { modelId: 'standard-360' });
+    expect(r.baseline.days).toEqual([]);
+    expect(r.baseline.tphProjected).toEqual([]);
+    expect(r.simulated.days).toEqual([]);
+    expect(r.simulated.tphProjected).toEqual([]);
+    expect(r.modelId).toBe('standard-360');
+    expect(r.horizonDays).toBe(360);
+    expect(r.kinetics.factors).toEqual([]);
+    expect(r.kinetics.effectiveRateMultiplier).toBe(1);
+  });
+
   it('sin cambios de parametros, linea base y simulado coinciden aproximadamente', () => {
     const m0 = baseMeasurement({
       id: 'a',

@@ -38,6 +38,24 @@ export function simulateScenario(
 ): SimulationResult {
   const { modelId, horizonDays } = resolveSimulationModelFromOptions(options);
 
+  if (measurements.length === 0) {
+    return {
+      baseline: { tphProjected: [], days: [] },
+      simulated: { tphProjected: [], days: [] },
+      deltaReductionPct: 0,
+      estimatedTimeSavedDays: null,
+      modelId,
+      horizonDays,
+      kinetics: {
+        kPerDay: 0,
+        tphInitialMgkg: 0,
+        effectiveRateMultiplier: 1,
+        referenceTiempoDias: 0,
+        factors: [],
+      },
+    };
+  }
+
   const sorted = [...measurements].sort((a, b) => a.tiempoDias - b.tiempoDias);
   const reference = sorted[sorted.length - 1]!;
 
