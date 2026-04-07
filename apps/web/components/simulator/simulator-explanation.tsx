@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Loader2, RefreshCw } from 'lucide-react';
 import type { SimulationResult } from '@tphzero/domain';
 import { Button } from '@/components/ui/button';
@@ -32,6 +32,18 @@ interface SimulatorExplanationProps {
 const EXPLAIN_INTRO =
   'La explicacion usa **solo** los numeros del simulador y el modelo indicado ($k$, $M$, series de $\\mathrm{TPH}$); **no** sustituye mediciones ni garantiza resultados en campo.';
 
+/** Firma estable del cuerpo enviado a explain; si cambia el contexto durante el fetch, no aplicamos la respuesta. */
+function explainPayloadSignature(body: ExplainRequestBody): string {
+  return JSON.stringify({
+    datasetId: body.datasetId,
+    biopilaId: body.biopilaId,
+    model: body.model,
+    horizonDays: body.horizonDays,
+    adjustedParamKeys: [...body.adjustedParamKeys].sort(),
+    result: body.result,
+  });
+}
+
 export function SimulatorExplanation({
   datasetId,
   biopilaId,
@@ -44,6 +56,15 @@ export function SimulatorExplanation({
   const [text, setText] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const latestRef = useRef({
+    datasetId,
+    biopilaId,
+    modelMeta,
+    result,
+    adjustedParamKeys,
+  });
+  latestRef.current = { datasetId, biopilaId, modelMeta, result, adjustedParamKeys };
 
   const hasValidText = Boolean(text) && !explanationStale;
 
@@ -59,6 +80,7 @@ export function SimulatorExplanation({
         result,
         adjustedParamKeys,
       };
+      const signatureAtSend = explainPayloadSignature(body);
       const res = await fetch('/api/simulator/explain', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -67,6 +89,18 @@ export function SimulatorExplanation({
       const data = (await res.json()) as { explanation?: string; error?: string };
       if (!res.ok) {
         setError(data.error ?? 'No se pudo generar la explicacion.');
+        return;
+      }
+      const cur = latestRef.current;
+      const bodyNow: ExplainRequestBody = {
+        datasetId: cur.datasetId,
+        biopilaId: cur.biopilaId,
+        model: { id: cur.modelMeta.id, name: cur.modelMeta.name },
+        horizonDays: cur.result.horizonDays,
+        result: cur.result,
+        adjustedParamKeys: cur.adjustedParamKeys,
+      };
+      if (explainPayloadSignature(bodyNow) !== signatureAtSend) {
         return;
       }
       setText(data.explanation ?? '');

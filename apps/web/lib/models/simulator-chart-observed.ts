@@ -65,6 +65,20 @@ export function piecewiseLinearValueAt(d: number, pts: ObservedPoint[]): number 
 }
 
 /**
+ * Tolerancia (días) para asociar una medición al punto de rejilla más cercano.
+ * Con proyecciones remuestreadas (~100 puntos) el paso puede ser >> 1 d; un umbral
+ * fijo ocultaría marcadores. Usamos al menos medio del mayor salto entre días consecutivos.
+ */
+export function gridSnapToleranceDays(days: number[]): number {
+  if (days.length < 2) return 0.51;
+  let maxGap = 0;
+  for (let i = 1; i < days.length; i++) {
+    maxGap = Math.max(maxGap, days[i]! - days[i - 1]!);
+  }
+  return Math.max(0.51, maxGap / 2);
+}
+
+/**
  * Para cada día del eje (ya filtrado por preset), valor TPH observado interpolado
  * linealmente entre mediciones consecutivas, solo en [t_min, t_max] de las observaciones.
  * `markerAtIndex`: día alineado con una medición (para dibujar marcador).
@@ -95,6 +109,8 @@ export function linearInterpolateObservedTph(
     interpolated[i] = piecewiseLinearValueAt(d, pts);
   }
 
+  const snapTol = gridSnapToleranceDays(days);
+
   for (const m of measurements) {
     if (!(m.tphActualMgkg > 0 && Number.isFinite(m.tiempoDias))) continue;
     let bestIdx = -1;
@@ -106,7 +122,7 @@ export function linearInterpolateObservedTph(
         bestIdx = i;
       }
     }
-    if (bestIdx >= 0 && bestDist < 0.51) {
+    if (bestIdx >= 0 && bestDist <= snapTol + TIME_EPS) {
       markerAtIndex[bestIdx] = true;
       markerValue[bestIdx] = m.tphActualMgkg;
     }

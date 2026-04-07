@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Measurement } from '@tphzero/domain';
 import {
   collectObservedPoints,
+  gridSnapToleranceDays,
   linearInterpolateObservedTph,
   piecewiseLinearValueAt,
 } from './simulator-chart-observed';
@@ -77,6 +78,13 @@ describe('piecewiseLinearValueAt', () => {
   });
 });
 
+describe('gridSnapToleranceDays', () => {
+  it('sube con el mayor salto de la rejilla (rejillas gruesas)', () => {
+    expect(gridSnapToleranceDays([0, 1, 2])).toBe(0.51);
+    expect(gridSnapToleranceDays([0, 100, 200])).toBe(50);
+  });
+});
+
 describe('linearInterpolateObservedTph', () => {
   it('alinea marcadores al dia mas cercano dentro del umbral', () => {
     const measurements = [
@@ -99,5 +107,17 @@ describe('linearInterpolateObservedTph', () => {
     const r = linearInterpolateObservedTph([0, 10], []);
     expect(r.interpolated.every((v) => v === null)).toBe(true);
     expect(r.markerAtIndex.every((v) => v === false)).toBe(true);
+  });
+
+  it('con rejilla gruesa sigue mostrando marcador cerca del dia de medida', () => {
+    const measurements = [
+      m({ tiempoDias: 55, tphActualMgkg: 333 }),
+      m({ tiempoDias: 0, tphActualMgkg: 1000 }),
+      m({ tiempoDias: 200, tphActualMgkg: 400 }),
+    ];
+    const days = [0, 100, 200];
+    const { markerAtIndex, markerValue } = linearInterpolateObservedTph(days, measurements);
+    expect(markerAtIndex[1]).toBe(true);
+    expect(markerValue[1]).toBe(333);
   });
 });
