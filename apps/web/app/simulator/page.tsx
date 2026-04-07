@@ -353,7 +353,7 @@ export default function SimulatorPage() {
                       />
                     </CardHeader>
                     <CardContent>
-                      <ComparisonChart result={result} />
+                      <ComparisonChart result={result} measurements={selectedMeasurements} />
                     </CardContent>
                   </Card>
 
