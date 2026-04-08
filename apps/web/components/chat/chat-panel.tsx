@@ -52,15 +52,15 @@ function MessageBubble({
         className={cn(
           'max-w-[80%] rounded-2xl border px-4 py-3',
           isUser
-            ? 'border-emerald-500/30 bg-emerald-500/10 text-zinc-100'
-            : 'border-zinc-800 bg-zinc-900 text-zinc-100'
+            ? 'border-emerald-500/30 bg-emerald-500/10 text-foreground'
+            : 'border-border bg-card text-foreground'
         )}
       >
         {children}
       </div>
 
       {isUser ? (
-        <div className="mt-1 rounded-full bg-zinc-800 p-2 text-zinc-300">
+        <div className="mt-1 rounded-full bg-muted p-2 text-muted-foreground">
           <User className="h-4 w-4" />
         </div>
       ) : null}
@@ -81,11 +81,11 @@ function RenderPart({ part }: { part: Record<string, unknown> }) {
 
     case 'reasoning':
       return (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-950/70 p-3">
-          <p className="mb-2 text-xs uppercase tracking-[0.2em] text-zinc-500">
+        <div className="rounded-xl border border-border bg-background/70 p-3">
+          <p className="mb-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
             Razonamiento
           </p>
-          <p className="whitespace-pre-wrap text-sm text-zinc-300">
+          <p className="whitespace-pre-wrap text-sm text-foreground/85">
             {typeof part.reasoning === 'string' ? part.reasoning : ''}
           </p>
         </div>
@@ -127,11 +127,11 @@ function RenderPart({ part }: { part: Record<string, unknown> }) {
 
     default:
       return (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-3">
-          <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
+        <div className="rounded-xl border border-border bg-background/60 p-3">
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
             {partType || 'Parte no renderizada'}
           </p>
-          <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs text-zinc-300">
+          <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs text-foreground/85">
             {stringifyValue(part)}
           </pre>
         </div>
@@ -176,8 +176,8 @@ export function ChatPanel() {
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center text-center">
             <Bot className="h-12 w-12 text-emerald-400/30" />
-            <p className="mt-4 text-lg font-medium text-zinc-300">TPHZero Copilot</p>
-            <p className="mt-1 max-w-md text-sm text-zinc-500">
+            <p className="mt-4 text-lg font-medium text-foreground/85">TPHZero Copilot</p>
+            <p className="mt-1 max-w-md text-sm text-muted-foreground">
               Preguntame sobre el estado de tus biopilas, pedi predicciones,
               recomendaciones o simula escenarios.
             </p>
@@ -187,7 +187,7 @@ export function ChatPanel() {
                   key={suggestion}
                   type="button"
                   onClick={() => setInput(suggestion)}
-                  className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200"
+                  className="rounded-md border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
                 >
                   {suggestion}
                 </button>
@@ -217,12 +217,12 @@ export function ChatPanel() {
             <div className="mt-1 rounded-full bg-emerald-500/20 p-2 text-emerald-400">
               <Bot className="h-4 w-4 animate-pulse" />
             </div>
-            <p className="text-sm text-zinc-500">Analizando...</p>
+            <p className="text-sm text-muted-foreground">Analizando...</p>
           </div>
         ) : null}
       </div>
 
-      <div className="border-t border-zinc-800 bg-zinc-950/80 p-4 backdrop-blur">
+      <div className="border-t border-border bg-background/80 p-4 backdrop-blur">
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -234,7 +234,7 @@ export function ChatPanel() {
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="Escribe tu pregunta..."
-            className="min-h-[44px] max-h-32 resize-none border-zinc-700 bg-zinc-900"
+            className="min-h-[44px] max-h-32 resize-none border-border bg-card"
             onKeyDown={(event) => {
               if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();

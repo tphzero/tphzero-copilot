@@ -59,14 +59,14 @@ export function DatasetHistory({
 
   return (
     <>
-      <div className="overflow-hidden rounded-lg border border-zinc-800">
+      <div className="overflow-hidden rounded-lg border border-border">
         <Table>
           <TableHeader>
-            <TableRow className="border-zinc-800 hover:bg-transparent">
-              <TableHead className="text-xs text-zinc-500">Nombre</TableHead>
-              <TableHead className="text-xs text-zinc-500">Nivel</TableHead>
-              <TableHead className="text-xs text-zinc-500">Filas</TableHead>
-              <TableHead className="text-xs text-zinc-500">Fecha</TableHead>
+            <TableRow className="border-border hover:bg-transparent">
+              <TableHead className="text-xs text-muted-foreground">Nombre</TableHead>
+              <TableHead className="text-xs text-muted-foreground">Nivel</TableHead>
+              <TableHead className="text-xs text-muted-foreground">Filas</TableHead>
+              <TableHead className="text-xs text-muted-foreground">Fecha</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -79,11 +79,11 @@ export function DatasetHistory({
                   key={row.id}
                   className={
                     isActive
-                      ? 'border-zinc-800 bg-zinc-800/60'
-                      : 'border-zinc-800'
+                      ? 'border-border bg-muted/60'
+                      : 'border-border'
                   }
                 >
-                  <TableCell className="font-medium text-zinc-200">
+                  <TableCell className="font-medium text-foreground">
                     <div className="flex items-center gap-2">
                       {row.name}
                       {isActive && (
@@ -99,15 +99,15 @@ export function DatasetHistory({
                   <TableCell>
                     <Badge
                       variant="outline"
-                      className="border-zinc-700 text-zinc-400"
+                      className="border-border text-muted-foreground"
                     >
                       Nivel {dataset.level}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-sm text-zinc-400">
+                  <TableCell className="text-sm text-muted-foreground">
                     {row.row_count.toLocaleString('es-MX')}
                   </TableCell>
-                  <TableCell className="text-sm text-zinc-400">
+                  <TableCell className="text-sm text-muted-foreground">
                     {fmt.format(new Date(row.created_at))}
                   </TableCell>
                   <TableCell className="text-right">
@@ -116,7 +116,7 @@ export function DatasetHistory({
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-7 border-zinc-700 text-xs hover:border-zinc-500"
+                          className="h-7 border-border text-xs hover:border-foreground/30"
                           onClick={() => onLoad(dataset)}
                         >
                           Cargar
@@ -125,7 +125,7 @@ export function DatasetHistory({
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-7 w-7 p-0 text-zinc-500 hover:text-red-400"
+                        className="h-7 w-7 p-0 text-muted-foreground hover:text-red-500"
                         onClick={() => setConfirmDeleteId(row.id)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -143,10 +143,10 @@ export function DatasetHistory({
         open={confirmDeleteId !== null}
         onOpenChange={(open) => !open && setConfirmDeleteId(null)}
       >
-        <DialogContent className="border-zinc-800 bg-zinc-900">
+        <DialogContent className="border-border bg-card">
           <DialogHeader>
             <DialogTitle>Eliminar dataset</DialogTitle>
-            <DialogDescription className="text-zinc-400">
+            <DialogDescription className="text-muted-foreground">
               Esta accion es irreversible. Se eliminaran el dataset y todas sus
               mediciones.
             </DialogDescription>
@@ -154,7 +154,7 @@ export function DatasetHistory({
           <DialogFooter>
             <Button
               variant="outline"
-              className="border-zinc-700"
+              className="border-border"
               onClick={() => setConfirmDeleteId(null)}
               disabled={deleting}
             >

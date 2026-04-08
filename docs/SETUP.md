@@ -27,7 +27,7 @@ npm install
 
 ## 3. Configurar variables de entorno
 
-Parte de la plantilla incluida en `.env.local.example`.
+Usa la plantilla incluida en `apps/web/.env.local.example`.
 
 ```bash
 cp .env.local.example apps/web/.env.local
