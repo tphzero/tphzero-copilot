@@ -1,0 +1,2 @@
+-- Datos opcionales para desarrollo local (se aplica tras migraciones en `supabase db reset`).
+-- Añade aquí INSERTs de prueba si los necesitas.

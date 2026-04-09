@@ -131,6 +131,8 @@ Levanta el proyecto:
 npm run dev
 ```
 
+**Supabase local (`dev:local` / `dev:local:fresh`):** antes comenta las variables de Supabase **cloud** en `apps/web/.env` y/o `.env.local` para que no pisen las inyectadas por el script (detalle en `docs/LOCAL-DATABASE.md`).
+
 Build del monorepo:
 
 ```bash
@@ -141,10 +143,16 @@ npm run build
 
 En la raiz:
 
-- `npm run dev`
+- `npm run dev` — desarrollo con **Supabase cloud** (o las variables que tengas en `apps/web/.env`).
+- `npm run dev:local` — **Supabase en Docker** local: `supabase start` + inyección automática de URL/claves + `npm run dev` (no borra la DB).
+- `npm run dev:local:fresh` — igual que `dev:local` pero ejecuta **`db reset`** (aplica migraciones; **borra datos locales**). Útil la primera vez o tras cambiar el esquema.
+- `npm run stop:local` — `supabase stop` (apaga la stack local; la app se detiene con Ctrl+C).
 - `npm run build`
 - `npm run lint`
 - `npm run test`
+- `npm run db:start` / `db:stop` / `db:reset` / `db:status` (pasos sueltos; requiere Docker para local)
+
+Detalle: `docs/LOCAL-DATABASE.md`.
 
 En `apps/web`:
 
@@ -155,18 +163,14 @@ En `apps/web`:
 
 ## Base de datos
 
-La migracion principal vive en:
+Las migraciones SQL estan en `supabase/migrations/` (formato con timestamp, p. ej. `20260408000000_initial_schema.sql`). Tablas principales: `datasets`, `measurements`.
 
-- `supabase/migrations/001_initial_schema.sql`
-
-Tablas principales:
-
-- `datasets`
-- `measurements`
+**Desarrollo con Postgres/API local (Docker):** `npm run dev:local` / `dev:local:fresh` o pasos manuales en `docs/LOCAL-DATABASE.md`.
 
 ## Documentacion adicional
 
 - Setup general: `docs/SETUP.md`
+- Base de datos local (Supabase CLI): `docs/LOCAL-DATABASE.md`
 - Deploy paso a paso: `docs/DEPLOY-VERCEL-SUPABASE-GEMINI.md`
 - Especificacion funcional: `SPEC.md`
 - Plan de implementacion: `docs/plans/2026-03-21-tphzero-copilot.md`

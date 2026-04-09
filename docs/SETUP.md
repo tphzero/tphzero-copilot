@@ -19,7 +19,7 @@ npm install
 
 1. Crea un proyecto en [supabase.com](https://supabase.com).
 2. Abre el SQL Editor.
-3. Ejecuta el contenido de `supabase/migrations/001_initial_schema.sql`.
+3. Ejecuta el contenido de la migracion inicial en `supabase/migrations/` (archivo `*_initial_schema.sql`), o usa el SQL Editor con el mismo DDL.
 4. Copia estas credenciales desde `Project Settings > API`:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -57,6 +57,11 @@ Abre:
 ```text
 http://localhost:3000
 ```
+
+### Base de datos en localhost (Docker)
+
+- **Todo automático:** `npm run dev:local` (día a día) o `npm run dev:local:fresh` (primera vez o tras cambiar migraciones). **Antes** de usarlos, comenta las variables de Supabase cloud en `apps/web/.env` / `.env.local` (el script no escribe esos archivos). Detalle: `docs/LOCAL-DATABASE.md` → *Antes de dev:local*.
+- **Pasos manuales** (`db:start`, `db:reset`, copiar claves): también en ese documento.
 
 ## 5. Validar build local
 

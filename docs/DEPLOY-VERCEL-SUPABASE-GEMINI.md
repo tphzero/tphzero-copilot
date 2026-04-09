@@ -44,7 +44,7 @@ Esta guia explica como dejar TPHZero Copilot funcionando en produccion con:
 3. Crea una nueva query
 4. Copia el contenido completo de:
 
-- `supabase/migrations/001_initial_schema.sql`
+- `supabase/migrations/*_initial_schema.sql` (migracion inicial del esquema)
 
 5. Ejecuta la query
 6. Verifica en `Table Editor` que existan:
@@ -291,10 +291,14 @@ Solucion:
 - vuelve a ejecutar la migracion
 - revisa `SUPABASE_SERVICE_ROLE_KEY`
 
+### 5. Desarrollo local con Supabase Docker (`dev:local`)
+
+Esta guia es de **produccion** (Vercel + Supabase cloud). Para trabajar con Supabase **en tu PC** (`npm run dev:local` / `dev:local:fresh`), antes comenta las variables de Supabase **cloud** en `apps/web/.env` y/o `.env.local` para que no entren en conflicto con las que inyecta el script. Detalle: `docs/LOCAL-DATABASE.md`.
+
 ## Archivos clave para esta configuracion
 
 - Setup general: `docs/SETUP.md`
 - Variables de entorno: `.env.local.example`
-- Migracion Supabase: `supabase/migrations/001_initial_schema.sql`
+- Migracion Supabase: ver `supabase/migrations/`
 - Config Vercel: `vercel.json`
 - Endpoint de chat: `apps/web/app/api/chat/route.ts`
