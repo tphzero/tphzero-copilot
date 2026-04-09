@@ -150,12 +150,19 @@ npm run dev
 npm run -w web dev
 ```
 
-### 8.4 Build
+### 8.4 Desarrollo con Supabase local (opcional)
+- `npm run dev:local` -> arranca Supabase local + app (conserva datos locales).
+- `npm run dev:local:fresh` -> idem, pero resetea DB local.
+- `npm run stop:local` -> detiene servicios locales de Supabase.
+
+Detalle: `docs/LOCAL-DATABASE.md`.
+
+### 8.5 Build
 ```bash
 npm run build
 ```
 
-### 8.5 Tests
+### 8.6 Tests
 ```bash
 npm run -w web test
 ```
@@ -182,7 +189,11 @@ npm run -w web test
 
 ## 10. Documentacion complementaria
 
-- Setup: `docs/SETUP.md`
+Las migraciones SQL estan en `supabase/migrations/` (formato con timestamp, p. ej. `20260408000000_initial_schema.sql`). Tablas principales: `datasets`, `measurements`.
+
+- Setup general: `docs/SETUP.md`
+- Base de datos local (Supabase CLI): `docs/LOCAL-DATABASE.md`
+- Deploy paso a paso: `docs/DEPLOY-VERCEL-SUPABASE-GEMINI.md`
 - Especificacion funcional: `SPEC.md`
 - Planes de trabajo: `docs/plans/`
 

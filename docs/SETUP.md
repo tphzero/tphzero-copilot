@@ -20,6 +20,7 @@ npm install
 1. Crea un proyecto en [supabase.com](https://supabase.com).
 2. Abre el SQL Editor.
 3. Ejecuta la migracion principal en `supabase/migrations/001_initial_schema.sql`.
+3. Ejecuta la migracion inicial de `supabase/migrations/` (archivo con sufijo `_initial_schema.sql`).
 4. Copia estas credenciales desde `Project Settings > API`:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -82,6 +83,11 @@ Abre:
 http://localhost:3000
 ```
 
+### Base de datos en localhost (Docker)
+
+- `npm run dev:local` (día a día) o `npm run dev:local:fresh` (reset local completo).
+- Detalle operativo: `docs/LOCAL-DATABASE.md`.
+
 ## 5. Verificaciones recomendadas
 
 Typecheck:
@@ -96,7 +102,7 @@ Tests:
 npm run -w web test
 ```
 
-Build de monorepo:
+Build:
 
 ```bash
 npm run build
