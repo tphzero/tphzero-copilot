@@ -52,10 +52,10 @@ export function DatasetNavTree({
   const headingTitle = datasetName ? `${datasetName} · ${datasetId}` : datasetId;
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
+    <div className="rounded-lg border border-border bg-card/40 p-3">
       <p
         className={cn(
-          'mb-2 text-xs font-medium text-zinc-300',
+          'mb-2 text-xs font-medium text-foreground/85',
           datasetName ? '' : 'font-mono',
           'min-w-0 truncate'
         )}
@@ -70,8 +70,8 @@ export function DatasetNavTree({
             className={cn(
               'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
               dashActive
-                ? 'bg-zinc-800 text-white'
-                : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
+                ? 'bg-muted text-foreground'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             )}
           >
             <LayoutDashboard className="h-4 w-4 shrink-0" />
@@ -88,8 +88,8 @@ export function DatasetNavTree({
                 className={cn(
                   'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
                   active
-                    ? 'bg-zinc-800 text-white'
-                    : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
+                    ? 'bg-muted text-foreground'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 )}
               >
                 <Leaf className="h-4 w-4 shrink-0" />

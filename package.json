@@ -2,7 +2,10 @@
   "name": "tphzero-copilot",
   "private": true,
   "packageManager": "npm@10.9.2",
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
@@ -10,6 +13,6 @@
     "test": "turbo test"
   },
   "devDependencies": {
-    "turbo": "^2"
+    "turbo": "^2.9.5"
   }
 }

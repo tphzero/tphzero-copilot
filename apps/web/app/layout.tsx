@@ -23,6 +23,14 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var k='tphzero-contrast-preset';if(localStorage.getItem(k)==='field'){document.documentElement.classList.add('field-hc');document.documentElement.setAttribute('data-contrast-preset','field')}}catch(e){}",
+          }}
+        />
+      </head>
       <body className="font-sans antialiased">
         <ThemeProvider>
           <DatasetProvider>

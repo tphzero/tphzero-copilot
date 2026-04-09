@@ -115,16 +115,16 @@ export function SimulatorExplanation({
   const buttonLabel = hasValidText ? 'Actualizar explicacion' : 'Generar explicacion';
 
   return (
-    <Card className="border-zinc-800 bg-zinc-900">
+    <Card className="border-border bg-card">
       <CardHeader>
         <CardTitle className="text-base">Interpretacion (IA)</CardTitle>
-        <LatexMarkdown className="text-xs text-zinc-500 [&_p]:text-xs" content={EXPLAIN_INTRO} />
+        <LatexMarkdown className="text-xs text-muted-foreground [&_p]:text-xs" content={EXPLAIN_INTRO} />
       </CardHeader>
       <CardContent className="space-y-3">
         <Button
           type="button"
           variant="outline"
-          className="border-zinc-600"
+          className="border-border"
           disabled={loading}
           onClick={() => void runExplain()}
         >

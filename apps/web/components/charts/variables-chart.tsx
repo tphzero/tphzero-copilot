@@ -42,19 +42,21 @@ export function VariablesChart({ measurements }: { measurements: Measurement[] }
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={data}>
-        <CartesianGrid stroke="#27272a" strokeDasharray="3 3" />
-        <XAxis dataKey="dia" stroke="#71717a" fontSize={12} />
-        <YAxis stroke="#71717a" fontSize={12} />
+        <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
+        <XAxis dataKey="dia" stroke="var(--muted-foreground)" fontSize={12} />
+        <YAxis stroke="var(--muted-foreground)" fontSize={12} />
         <Tooltip
           contentStyle={{
-            backgroundColor: '#18181b',
-            border: '1px solid #3f3f46',
+            backgroundColor: 'var(--card)',
+            border: '1px solid var(--border)',
             borderRadius: '8px',
           }}
+          labelStyle={{ color: 'var(--foreground)' }}
+          itemStyle={{ color: 'var(--foreground)' }}
           labelFormatter={(value) => `Dia ${value}`}
           formatter={(value, name) => formatVariableValue(value, String(name))}
         />
-        <Legend />
+        <Legend wrapperStyle={{ color: 'var(--foreground)' }} />
         {VARIABLES.map(({ label, color }) => (
           <Line
             key={label}

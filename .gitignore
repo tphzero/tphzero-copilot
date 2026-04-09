@@ -13,11 +13,38 @@ dist
 **/.env
 .env.*
 **/.env.*
+.envrc
+**/.envrc
+*.env.bak
+*.env.backup
+*.secret
+*.secrets
+secrets.*
+**/secrets.*
 # Committed templates only (must stay after ignore rules above)
 !.env.local.example
 !**/.env.local.example
 !.env.example
 !**/.env.example
+!*.env.example.*
+
+# Credential/key material
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+id_rsa
+id_ed25519
+*.ovpn
+
+# Cloud/service credentials
+*service-account*.json
+*firebase-adminsdk*.json
+*supabase*.toml
+.npmrc
+**/.npmrc
 
 # OS
 .DS_Store

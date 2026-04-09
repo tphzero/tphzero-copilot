@@ -39,25 +39,25 @@ export function SimulatorKineticsPanel({ kinetics }: SimulatorKineticsPanelProps
     'Esta herramienta **no** predice con certeza el resultado en campo: los coeficientes ($Q_{10}$, $K$ de Monod, etc.) son simplificaciones. Para decisiones criticas, combine la simulacion con mediciones nuevas y criterio tecnico.';
 
   return (
-    <details className="group rounded-lg border border-zinc-800 bg-zinc-950/50 open:bg-zinc-900/30">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-left text-sm font-medium text-zinc-200 marker:content-none hover:bg-zinc-800/50 [&::-webkit-details-marker]:hidden">
+    <details className="group rounded-lg border border-border bg-background/50 open:bg-card/30">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-left text-sm font-medium text-foreground marker:content-none hover:bg-muted/50 [&::-webkit-details-marker]:hidden">
         <span>Como se calcula el escenario simulado</span>
-        <ChevronDown className="h-4 w-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" />
+        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
       </summary>
-      <div className="space-y-4 border-t border-zinc-800 px-4 pb-4 pt-2 text-sm text-zinc-400">
+      <div className="space-y-4 border-t border-border px-4 pb-4 pt-2 text-sm text-muted-foreground">
         <LatexMarkdown content={intro1} />
-        <LatexMarkdown className="text-zinc-500" content={intro2} />
+        <LatexMarkdown className="text-muted-foreground" content={intro2} />
 
         <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <div className="rounded border border-zinc-800/80 bg-zinc-900/40 p-3">
+          <div className="rounded border border-border/80 bg-card/40 p-3">
             <LatexMarkdown
               content={`**$\\mathrm{TPH}_{0}$ (serie):** $${tphFormatted}~\\mathrm{mg\\,kg}^{-1}$.`}
             />
           </div>
-          <div className="rounded border border-zinc-800/80 bg-zinc-900/40 p-3">
+          <div className="rounded border border-border/80 bg-card/40 p-3">
             <LatexMarkdown content={kBlock} />
           </div>
-          <div className="rounded border border-zinc-800/80 bg-zinc-900/40 p-3 sm:col-span-2">
+          <div className="rounded border border-border/80 bg-card/40 p-3 sm:col-span-2">
             <LatexMarkdown
               content={`**$M$ (multiplicador operativo):** $M = ${effectiveRateMultiplier.toFixed(3)}$.`}
             />
@@ -66,25 +66,25 @@ export function SimulatorKineticsPanel({ kinetics }: SimulatorKineticsPanelProps
 
         {factors.length > 0 ? (
           <div>
-            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Factores respecto a la referencia
             </p>
             <ul className="max-h-48 space-y-2 overflow-y-auto text-xs">
               {factors.map((f) => (
                 <li
                   key={f.id}
-                  className="border-b border-zinc-800/60 py-2 last:border-0"
+                  className="border-b border-border/60 py-2 last:border-0"
                 >
                   <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                    <LatexMarkdown inline className="text-zinc-300" content={f.label} />
+                    <LatexMarkdown inline className="text-foreground/85" content={f.label} />
                     <LatexMarkdown
                       inline
-                      className="font-mono text-zinc-200"
+                      className="font-mono text-foreground"
                       content={`$r \\approx ${f.ratio.toFixed(3)}$`}
                     />
                   </div>
                   <div className="mt-1">
-                    <LatexMarkdown className="text-zinc-500 [&_p]:text-xs" content={f.basis} />
+                    <LatexMarkdown className="text-muted-foreground [&_p]:text-xs" content={f.basis} />
                   </div>
                 </li>
               ))}
@@ -92,8 +92,8 @@ export function SimulatorKineticsPanel({ kinetics }: SimulatorKineticsPanelProps
           </div>
         ) : null}
 
-        <div className="border-t border-zinc-800 pt-3">
-          <LatexMarkdown className="text-xs text-zinc-600 [&_p]:text-xs" content={disclaimer} />
+        <div className="border-t border-border pt-3">
+          <LatexMarkdown className="text-xs text-muted-foreground [&_p]:text-xs" content={disclaimer} />
         </div>
       </div>
     </details>

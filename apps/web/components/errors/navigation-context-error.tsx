@@ -29,12 +29,12 @@ export function NavigationContextError({
 
   return (
     <div className="flex min-h-[50vh] items-center justify-center p-6">
-      <Card className="max-w-lg border-zinc-800 bg-zinc-900">
+      <Card className="max-w-lg border-border bg-card">
         <CardHeader>
           <CardTitle>{title}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-zinc-400">{description}</p>
+          <p className="text-sm text-muted-foreground">{description}</p>
           <Link
             href="/"
             className={cn(

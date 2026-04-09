@@ -13,6 +13,7 @@ import { useLatestDatasetId } from '@/hooks/use-latest-dataset-id';
 import { datasetDashboardPath, datasetIdFromPathname } from '@/lib/navigation/routes';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { ContrastPresetToggle } from '@/components/layout/contrast-preset-toggle';
 
 const STATIC_NAV = [
   {
@@ -53,6 +54,9 @@ export function SidebarNav() {
         <p className="hidden font-mono text-xs text-muted-foreground md:block">Copilot</p>
         <div className="mt-3">
           <ThemeToggle />
+        </div>
+        <div className="mt-2">
+          <ContrastPresetToggle />
         </div>
       </div>
 

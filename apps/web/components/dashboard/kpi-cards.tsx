@@ -37,18 +37,18 @@ export function KPICards({
       label: 'Estado critico',
       value: criticalCount,
       icon: Timer,
-      color: criticalCount > 0 ? 'text-red-400' : 'text-zinc-400',
+      color: criticalCount > 0 ? 'text-red-400' : 'text-muted-foreground',
     },
   ];
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {kpis.map(({ label, value, icon: Icon, color }) => (
-        <Card key={label} className="border-zinc-800 bg-zinc-900">
+        <Card key={label} className="border-border bg-card">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-xs text-zinc-500">{label}</p>
+                <p className="text-xs text-muted-foreground">{label}</p>
                 <p className={`mt-1 font-mono text-2xl font-bold ${color}`}>
                   {value}
                 </p>
