@@ -288,6 +288,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
 ```
 
+Desarrollo con Supabase **local** (Docker, `npm run dev:local`): no sustituye las variables anteriores en disco; el script inyecta URL y claves en el proceso. Antes de usarlo, comenta las tres claves de Supabase **cloud** en `apps/web/.env` / `.env.local` para evitar conflictos. Ver `docs/LOCAL-DATABASE.md`.
+
 ---
 
 ## 8. Consideraciones de Extensibilidad
