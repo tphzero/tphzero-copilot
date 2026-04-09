@@ -8,6 +8,9 @@ dist
 # Turborepo
 .turbo
 
+# TypeScript incremental cache (regenerated when "incremental": true in tsconfig)
+*.tsbuildinfo
+
 # Environment variables — never commit secrets (any directory)
 .env
 **/.env
@@ -24,3 +27,6 @@ dist
 Thumbs.db
 
 .vercel
+
+# Claude Code — local permissions / overrides (not shared)
+.claude/settings.local.json
