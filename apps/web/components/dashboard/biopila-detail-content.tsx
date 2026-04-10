@@ -111,12 +111,12 @@ export function BiopilaDetailContent({
       value: `${Math.round(latestMeasurement.tphActualMgkg).toLocaleString()} mg/kg`,
     },
     {
-      label: 'Reduccion',
+      label: 'Reducción',
       value: `${(reduction * 100).toFixed(1)}%`,
     },
     {
-      label: 'Dia',
-      value: latestMeasurement.tiempoDias,
+      label: 'Tiempo de operación (días)',
+      value: String(latestMeasurement.tiempoDias),
     },
     {
       label: 'Enmienda',
@@ -150,7 +150,7 @@ export function BiopilaDetailContent({
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Card className="border-zinc-800 bg-zinc-900">
           <CardHeader>
-            <CardTitle>Evolucion TPH</CardTitle>
+            <CardTitle>Evolución de TPH</CardTitle>
           </CardHeader>
           <CardContent>
             <TPHTimeline data={sortedMeasurements} />
@@ -174,9 +174,9 @@ export function BiopilaDetailContent({
           <Table>
             <TableHeader>
               <TableRow className="border-zinc-800">
-                <TableHead className="font-mono text-xs">Dia</TableHead>
+                <TableHead className="font-mono text-xs">Día</TableHead>
                 <TableHead className="font-mono text-xs">TPH (mg/kg)</TableHead>
-                <TableHead className="font-mono text-xs">Reduccion</TableHead>
+                <TableHead className="font-mono text-xs">Reducción</TableHead>
                 <TableHead className="font-mono text-xs">Temp (C)</TableHead>
                 <TableHead className="font-mono text-xs">Humedad (%)</TableHead>
                 <TableHead className="font-mono text-xs">O2 (%)</TableHead>

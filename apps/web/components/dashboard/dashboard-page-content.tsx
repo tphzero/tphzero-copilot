@@ -134,13 +134,19 @@ export function DashboardPageContent({ datasetId }: { datasetId: string }) {
       {biopilas.length > 0 ? (
         <>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {biopilas.map((biopila) => (
-              <BiopilaCard
-                key={biopila.biopilaId}
-                datasetId={datasetId}
-                biopila={biopila}
-              />
-            ))}
+            {biopilas.map((biopila) => {
+              const tipoUniformeEnBiopila = biopila.measurements.every(
+                (m) => m.tipoHidrocarburo === biopila.latestMeasurement.tipoHidrocarburo
+              );
+              return (
+                <BiopilaCard
+                  key={biopila.biopilaId}
+                  datasetId={datasetId}
+                  biopila={biopila}
+                  tipoUniformeEnBiopila={tipoUniformeEnBiopila}
+                />
+              );
+            })}
           </div>
           <OverviewCharts biopilas={biopilas} />
         </>

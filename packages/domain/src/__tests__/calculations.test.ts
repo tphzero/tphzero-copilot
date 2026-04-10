@@ -8,7 +8,9 @@ import {
   measurementAtOrBefore,
   buildReductionHorizonOptions,
   tphReductionAtTiempoDias,
+  tphRemediationDynamics,
 } from '../calculations';
+import { primaryEnvironmentalDeviation } from '../state-explanation';
 import { classifyValue } from '../thresholds';
 import type { Measurement } from '../types';
 
@@ -121,5 +123,46 @@ describe('classifyBiopilaState', () => {
   });
   it('returns suboptimo when variable is acceptable not optimal', () => {
     expect(classifyBiopilaState({ ...baseMeasurement, humedadSueloPct: 15 })).toBe('suboptimo');
+  });
+});
+
+describe('primaryEnvironmentalDeviation', () => {
+  it('returns null when all variables optimal', () => {
+    expect(primaryEnvironmentalDeviation(baseMeasurement)).toBeNull();
+  });
+  it('returns pH when critical', () => {
+    const d = primaryEnvironmentalDeviation({ ...baseMeasurement, ph: 4.0 });
+    expect(d?.variableKey).toBe('ph');
+    expect(d?.status).toBe('critico');
+  });
+  it('returns humedad when suboptimal', () => {
+    const d = primaryEnvironmentalDeviation({ ...baseMeasurement, humedadSueloPct: 15 });
+    expect(d?.variableKey).toBe('humedad_suelo_pct');
+    expect(d?.status).toBe('suboptimo');
+  });
+});
+
+describe('tphRemediationDynamics', () => {
+  it('returns nulls when fewer than two measurements', () => {
+    expect(tphRemediationDynamics([baseMeasurement])).toEqual({
+      mgKgPerWeekRecent: null,
+      mgKgPerWeekPrevious: null,
+      recentVsPreviousRatio: null,
+    });
+    expect(tphRemediationDynamics([])).toEqual({
+      mgKgPerWeekRecent: null,
+      mgKgPerWeekPrevious: null,
+      recentVsPreviousRatio: null,
+    });
+  });
+
+  it('computes parallel slopes and ratio ~1 for linear decline', () => {
+    const m0 = { ...baseMeasurement, id: 'a', tiempoDias: 0, tphActualMgkg: 100_000 };
+    const m60 = { ...baseMeasurement, id: 'b', tiempoDias: 60, tphActualMgkg: 80_000 };
+    const m120 = { ...baseMeasurement, id: 'c', tiempoDias: 120, tphActualMgkg: 60_000 };
+    const r = tphRemediationDynamics([m0, m60, m120], { recentDays: 60 });
+    expect(r.mgKgPerWeekRecent).toBeCloseTo((80_000 - 60_000) / (60 / 7));
+    expect(r.mgKgPerWeekPrevious).toBeCloseTo((100_000 - 80_000) / (60 / 7));
+    expect(r.recentVsPreviousRatio).toBeCloseTo(1);
   });
 });
