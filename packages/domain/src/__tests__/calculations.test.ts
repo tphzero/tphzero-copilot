@@ -5,6 +5,9 @@ import {
   mean,
   stdDev,
   pearsonCorrelation,
+  measurementAtOrBefore,
+  buildReductionHorizonOptions,
+  tphReductionAtTiempoDias,
 } from '../calculations';
 import { classifyValue } from '../thresholds';
 import type { Measurement } from '../types';
@@ -19,6 +22,41 @@ const baseMeasurement: Measurement = {
   precipitacionesMm: 5, porcentajeReduccionTph: 0.25,
   estadoSistema: null, recomendacionOperativa: null,
 };
+
+describe('measurementAtOrBefore', () => {
+  it('returns last measurement at or before target', () => {
+    const m0 = { ...baseMeasurement, tiempoDias: 0, tphActualMgkg: 80000 };
+    const m30 = { ...baseMeasurement, tiempoDias: 30, tphActualMgkg: 60000 };
+    const m90 = { ...baseMeasurement, tiempoDias: 90, tphActualMgkg: 40000 };
+    expect(measurementAtOrBefore([m30, m0, m90], 45)?.tiempoDias).toBe(30);
+    expect(measurementAtOrBefore([m30, m0, m90], 90)?.tiempoDias).toBe(90);
+  });
+  it('returns null for empty measurements', () => {
+    expect(measurementAtOrBefore([], 30)).toBeNull();
+  });
+});
+
+describe('buildReductionHorizonOptions', () => {
+  it('adds steps of 30 and last day', () => {
+    expect(buildReductionHorizonOptions(360)).toEqual([30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360]);
+    expect(buildReductionHorizonOptions(45)).toEqual([30, 45]);
+    expect(buildReductionHorizonOptions(15)).toEqual([15]);
+  });
+  it('returns [0] for non-positive max', () => {
+    expect(buildReductionHorizonOptions(0)).toEqual([0]);
+  });
+});
+
+describe('tphReductionAtTiempoDias', () => {
+  it('uses measurement at or before target and initial TPH from first row', () => {
+    const m0 = { ...baseMeasurement, tiempoDias: 0, tphActualMgkg: 80000 };
+    const m60 = { ...baseMeasurement, tiempoDias: 60, tphActualMgkg: 40000 };
+    expect(tphReductionAtTiempoDias([m0, m60], 60)).toBeCloseTo(0.5);
+    expect(tphReductionAtTiempoDias([m0, m60], 45)).toBeCloseTo(
+      reductionPercent(80000, 80000)
+    );
+  });
+});
 
 describe('reductionPercent', () => {
   it('returns 0.5 for 50% reduction', () => {

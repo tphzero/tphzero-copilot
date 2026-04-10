@@ -18,6 +18,46 @@ export function reductionPercent(tphInicial: number, tphActual: number): number 
   return Math.max(0, (tphInicial - tphActual) / tphInicial);
 }
 
+/** Última medición con tiempoDias <= targetDias; si no hay, la primera del historial. */
+export function measurementAtOrBefore(
+  measurements: Measurement[],
+  targetDias: number
+): Measurement | null {
+  if (measurements.length === 0) return null;
+  const sorted = [...measurements].sort((a, b) => a.tiempoDias - b.tiempoDias);
+  let best: Measurement | null = null;
+  for (const m of sorted) {
+    if (m.tiempoDias <= targetDias) best = m;
+    else break;
+  }
+  return best ?? sorted[0]!;
+}
+
+/**
+ * Opciones de horizonte: cada 30 días hasta maxDias, más el día de la última medición si no coincide.
+ */
+export function buildReductionHorizonOptions(maxDias: number): number[] {
+  if (maxDias <= 0) return [0];
+  const out = new Set<number>();
+  for (let d = 30; d <= maxDias; d += 30) {
+    out.add(d);
+  }
+  out.add(maxDias);
+  return [...out].sort((a, b) => a - b);
+}
+
+/** Reducción vs TPH inicial de la biopila usando la medición vigente al instante targetDias. */
+export function tphReductionAtTiempoDias(
+  measurements: Measurement[],
+  targetDias: number
+): number {
+  if (measurements.length === 0) return 0;
+  const sorted = [...measurements].sort((a, b) => a.tiempoDias - b.tiempoDias);
+  const at = measurementAtOrBefore(measurements, targetDias)!;
+  const tphInicial = sorted[0]!.tphInicialMgkg;
+  return reductionPercent(tphInicial, at.tphActualMgkg);
+}
+
 export function mean(values: number[]): number {
   if (values.length === 0) return 0;
   return values.reduce((a, b) => a + b, 0) / values.length;
