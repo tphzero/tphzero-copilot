@@ -42,6 +42,7 @@ const STATUS_COLORS = {
   optimo: '#10b981',
   suboptimo: '#f59e0b',
   critico: '#ef4444',
+  sin_datos: '#52525b',
 } as const;
 
 const REDUCTION_CHART_LEGEND: {
@@ -51,15 +52,20 @@ const REDUCTION_CHART_LEGEND: {
   { state: 'optimo', label: 'Óptimo' },
   { state: 'suboptimo', label: 'Subóptimo' },
   { state: 'critico', label: 'Crítico' },
+  { state: 'sin_datos', label: 'Sin medición en el día' },
 ];
 
 /** Ticks/strokes on chart area (~#09090b); lighter than #71717a for WCAG AA on dark bg */
 const CHART_AXIS_STROKE = '#a1a1aa';
 const CHART_AXIS_TEXT = '#d4d4d8';
 
-function formatReductionValue(
-  value: number | string | readonly (number | string)[] | undefined
+function formatReductionTooltip(
+  value: number | string | readonly (number | string)[] | undefined,
+  sinDatos: boolean
 ) {
+  if (sinDatos) {
+    return ['Sin medición en este día', 'Reducción'] as const;
+  }
   const rawValue = Array.isArray(value) ? value[0] : value;
   const numericValue = typeof rawValue === 'number' ? rawValue : Number(rawValue ?? 0);
   return [`${numericValue.toFixed(1)}%`, 'Reducción'] as const;
@@ -112,16 +118,17 @@ export function OverviewCharts({ biopilas }: OverviewChartsProps) {
     if (!Number.isFinite(selectedDay)) return [];
     return biopilas.map((biopila) => {
       const at = measurementAtOrBefore(biopila.measurements, selectedDay);
-      const estado = at
-        ? classifyBiopilaState(at)
-        : biopila.state;
+      const reduccionFrac = tphReductionAtTiempoDias(biopila.measurements, selectedDay);
+      const sinDatos = reduccionFrac === null;
+      const estado = sinDatos
+        ? ('sin_datos' as const)
+        : classifyBiopilaState(at!);
       return {
         id: biopila.biopilaId,
-        reduccion: Number(
-          (tphReductionAtTiempoDias(biopila.measurements, selectedDay) * 100).toFixed(
-            1
-          )
-        ),
+        reduccion: sinDatos
+          ? 0
+          : Number((reduccionFrac * 100).toFixed(1)),
+        sinDatos,
         estado,
       };
     });
@@ -258,7 +265,14 @@ export function OverviewCharts({ biopilas }: OverviewChartsProps) {
                 labelFormatter={(label) =>
                   `${String(label)} · referencia día ${Number.isFinite(selectedDay) ? selectedDay : '—'}`
                 }
-                formatter={(value) => formatReductionValue(value)}
+                formatter={(value, _name, item) =>
+                  formatReductionTooltip(
+                    value,
+                    Boolean(
+                      (item as { payload?: { sinDatos?: boolean } }).payload?.sinDatos
+                    )
+                  )
+                }
               />
               <Bar dataKey="reduccion" radius={[0, 6, 6, 0]}>
                 {reductionData.map((entry) => (

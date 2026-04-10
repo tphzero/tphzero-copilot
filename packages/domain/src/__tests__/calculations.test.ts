@@ -36,6 +36,10 @@ describe('measurementAtOrBefore', () => {
   it('returns null for empty measurements', () => {
     expect(measurementAtOrBefore([], 30)).toBeNull();
   });
+  it('returns null when every measurement is after the target day', () => {
+    const m120 = { ...baseMeasurement, tiempoDias: 120 };
+    expect(measurementAtOrBefore([m120], 30)).toBeNull();
+  });
 });
 
 describe('buildReductionHorizonOptions', () => {
@@ -57,6 +61,13 @@ describe('tphReductionAtTiempoDias', () => {
     expect(tphReductionAtTiempoDias([m0, m60], 45)).toBeCloseTo(
       reductionPercent(80000, 80000)
     );
+  });
+  it('returns null when no measurement exists at or before target day', () => {
+    const m120 = { ...baseMeasurement, tiempoDias: 120, tphActualMgkg: 50000 };
+    expect(tphReductionAtTiempoDias([m120], 30)).toBeNull();
+  });
+  it('returns null for empty measurements', () => {
+    expect(tphReductionAtTiempoDias([], 30)).toBeNull();
   });
 });
 

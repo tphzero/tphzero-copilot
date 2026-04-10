@@ -1,7 +1,7 @@
-# Especificación detallada: gráficos del dashboard (TPH-8)
+# Especificación detallada: gráficos del dashboard (TPH-8) y tarjetas por biopila (KPI)
 
 **Issue:** [TPH-8 — Dashboard - Mejorar los graficos mostrados](https://linear.app/tphzero-team/issue/TPH-8/dashboard-mejorar-los-graficos-mostrados)  
-**Estado del documento:** especificación detallada para implementación y QA  
+**Estado del documento:** especificación detallada para implementación y QA (**§1–12**, alcance original TPH-8); **registro de lo implementado** para **BiopilaCard y dominio asociado** (**§13**).  
 **Última actualización:** 2026-04-10  
 **Relacionado:** [2026-04-04-dashboard-navigation-context.md](./2026-04-04-dashboard-navigation-context.md)
 
@@ -10,6 +10,8 @@
 ## 1. Propósito
 
 Definir de forma **cerrada** qué debe implementarse para cumplir [TPH-8](https://linear.app/tphzero-team/issue/TPH-8/dashboard-mejorar-los-graficos-mostrados): **ejes con nombre y unidades**, **texto de ayuda por gráfico**, y **contraste** alineado a WCAG AA sin romper la línea visual actual.
+
+La **§13** documenta, como registro de producto e ingeniería, las **tarjetas por biopila (`BiopilaCard`)**, funciones de dominio y copy de detalle que se implementaron en la misma línea de trabajo del dashboard (complemento a los gráficos; no sustituye el texto del issue TPH-8 en §2–3).
 
 Este documento **no** sustituye el issue en Linear; sirve como checklist de ingeniería y revisión.
 
@@ -29,7 +31,8 @@ Este documento **no** sustituye el issue en Linear; sirve como checklist de inge
 |------|----------|
 | Ruta | Solo **`/datasets/[datasetId]/dashboard`**. |
 | Gráficos en alcance | Los **dos** bloques renderizados por **`OverviewCharts`**: (1) evolución de TPH, (2) reducción por biopila. |
-| Fuera de alcance TPH-8 | Vista **`/datasets/.../biopila/...`**, tarjetas KPI, **`BiopilaCard`**, timeline “sin biopila” en `DashboardPageContent`. |
+| Fuera de alcance del issue TPH-8 (original) | Vista **`/datasets/.../biopila/...`** (detalle), timeline “sin biopila” en `DashboardPageContent`. Las **tarjetas `BiopilaCard`** estaban fuera del alcance **del issue**; su especificación e implementación quedan registradas en **§13**. |
+| Ampliación implementada (registro §13) | **`BiopilaCard`**, dominio `primaryEnvironmentalDeviation` / `tphRemediationDynamics`, `TphSparkline`, copy unificado en detalle de biopila. |
 | Idioma | **Español**, copy **estático** en código (sin i18n en esta historia). |
 | Longitud del texto de ayuda | En **desktop**, **~dos líneas** sin **scroll** dentro del bloque del gráfico; en móvil puede envolver más. Evitar alturas de `Card` excesivas. |
 | Accesibilidad | **WCAG 2.1 AA** para **texto** (≥ **4.5:1** con el fondo). Series **distinguibles** sin depender solo del color si es viable (grosor, leyenda clara). Mantener **paleta zinc / semántica actual** (emerald, ámbar, rojo); ajustar tonos antes que cambiar de sistema. |
@@ -178,11 +181,13 @@ Máximo **~2 líneas en desktop** por bloque; sin scroll en el contenedor del te
 
 ## 11. Fuera de alcance (backlog / otros issues)
 
-- Detalle de biopila, simulador, exportación PNG/PDF.
-- KPIs: definición de “reducción promedio” por fila vs por biopila.
+- Simulador, exportación PNG/PDF.
+- KPIs agregados del dashboard: definición formal de “reducción promedio” por fila vs por biopila (distinto del copy ya mostrado en tarjetas).
 - Filtros, reordenación de barras, líneas de meta normativa.
 - i18n.
 - Nuevos tipos de gráfico (donut, tabla, heatmap).
+
+*(La vista **detalle de biopila** y las **tarjetas `BiopilaCard`** no son backlog de TPH-8; su comportamiento documentado está en **§13**.)*
 
 ---
 
@@ -192,7 +197,98 @@ Máximo **~2 líneas en desktop** por bloque; sin scroll en el contenedor del te
 - `apps/web/components/dashboard/overview-charts.tsx`
 - `apps/web/components/charts/tph-timeline.tsx`
 - Dominio: `packages/domain` — `reductionPercent`, `BiopilaOverview`, `classifyBiopilaState`
+- Ampliación BiopilaCard: ver **§13**.
 
 ---
 
-*Fin de la especificación detallada TPH-8.*
+## 13. Tarjetas por biopila (`BiopilaCard`) — especificación implementada (registro)
+
+Esta sección describe el comportamiento **implementado** en código para enriquecer las tiles del dashboard: conexión del **estado** (`StatusIndicator` / `classifyBiopilaState`) con la **variable** que más lo explica, **contexto TPH** inicial vs actual, **ritmo de remediación** reciente frente al período anterior, **mini tendencia** TPH, y tratamiento del **tipo de hidrocarburo**. Sirve como fuente de verdad para QA y evoluciones futuras.
+
+### 13.1 Ruta y datos
+
+| Tema | Decisión implementada |
+|------|------------------------|
+| Ruta | Listado de tarjetas en **`/datasets/[datasetId]/dashboard`** dentro de `DashboardPageContent`; cada tarjeta enlaza a **`/datasets/[datasetId]/biopila/[biopilaId]`**. |
+| Fuente de datos | `BiopilaOverview`: `latestMeasurement`, `measurements[]`, `state`, `tphReductionPct`, `tiempoDias` (construcción actual en `dashboard-page-content.tsx`). |
+
+### 13.2 Dominio (`packages/domain`)
+
+**`primaryEnvironmentalDeviation(m: Measurement)`** (`state-explanation.ts`)
+
+- Considera las mismas cuatro magnitudes que `classifyBiopilaState`: temperatura suelo, humedad suelo, oxígeno, pH (claves de umbral `temperatura_suelo_c`, `humedad_suelo_pct`, `oxigeno_pct`, `ph`).
+- Para cada una obtiene `classifyValue` y **descarta** variables en estado óptimo.
+- Entre las no óptimas, elige **mayor severidad** (`critico` > `suboptimo`). En empate de severidad, **mayor distancia** al intervalo **óptimo** (`THRESHOLDS[*].optimal`).
+- Devuelve `null` si todas son óptimas.
+- Tipo exportado: `EnvironmentalDeviation` (`variableKey`, `label`, `shortLabel`, `value`, `unit`, `status`).
+
+**`tphRemediationDynamics(measurements, { recentDays? })`** (`calculations.ts`)
+
+- Ventana por defecto **60 días** (`DEFAULT_REMEDIATION_WINDOW_DAYS`).
+- Última medición `tLast`; punto de inicio de ventana reciente: `measurementAtOrBefore(measurements, tLast - W)`.
+- **mg/kg por semana (reciente):** \((\mathrm{tph}_{\mathrm{inicio}} - \mathrm{tph}_{\mathrm{último}}) / (\Delta \mathrm{días} / 7)\) con \(\Delta\) entre ambas mediciones.
+- **Período anterior** de igual duración en días: entre `measurementAtOrBefore(..., tLast - 2W)` y el punto de inicio de la ventana reciente; misma fórmula de pendiente → `mgKgPerWeekPrevious`.
+- **`recentVsPreviousRatio`:** cociente reciente / anterior cuando el denominador ≠ 0 y ambos son finitos; si no hay datos suficientes, campos `null` (la UI no inventa valores).
+
+### 13.3 UI: `BiopilaCard` (`apps/web/components/dashboard/biopila-card.tsx`)
+
+**Cabecera**
+
+- `biopilaId` (monoespaciado) + `StatusIndicator` (`biopila.state`).
+- Si **todas** las mediciones de la biopila tienen el mismo `tipoHidrocarburo` (`tipoUniformeEnBiopila` calculado en el padre), el tipo se muestra como **subtítulo** pequeño bajo el ID; si no, el tipo aparece en **una línea al pie** de la tarjeta (“Tipo: …”).
+
+**Contexto TPH**
+
+- Una línea compacta: **TPH** *inicial redondeado* **→** *actual redondeado* **mg/kg** (`tphInicialMgkg`, `tphActualMgkg` de la última medición).
+
+**Grid 2×2 (métricas + cuarto bloque)**
+
+- **TPH actual** (valor numérico mg/kg).
+- **Reducción** (tilde), porcentaje desde `tphReductionPct`.
+- **Tiempo de operación** + valor en **días** (`tiempoDias` + sufijo `d`).
+- **Cuarto bloque:**  
+  - Si `state !== 'optimo'` y hay `primaryEnvironmentalDeviation`: bloque **Variable crítica** (etiqueta corta, valor con unidad, texto de severidad *crítico* / *subóptimo*) y debajo **Tendencia TPH** + sparkline.  
+  - Si estado óptimo: solo **Tendencia TPH** + sparkline.
+
+**Sparkline** (`apps/web/components/charts/tph-sparkline.tsx`)
+
+- SVG fijo **40×16** px, `polyline` sobre `tiempoDias` y `tphActualMgkg`; sin Recharts por tarjeta. Si hay **menos de 2** mediciones, no se renderiza trazo útil (componente devuelve `null`).
+
+**Ritmo reciente**
+
+- Si `tphRemediationDynamics` devuelve `mgKgPerWeekRecent`: línea **“Ritmo reciente: ≈ … mg/kg·sem”** con formato abreviado para miles si aplica.
+- Si además hay `recentVsPreviousRatio`: texto comparativo (*similar al período anterior*, *X% más rápido…*, *X% más lento…*).
+
+### 13.4 Vista detalle de biopila (`biopila-detail-content.tsx`)
+
+Copy alineado al dashboard:
+
+- KPIs: **Reducción**; **Tiempo de operación (días)** como etiqueta del tiempo acumulado.
+- Card **Evolución de TPH** (tilde en Evolución).
+- Tabla de mediciones: cabeceras **Día**, **Reducción** (con tilde).
+
+### 13.5 Archivos tocados (referencia)
+
+| Archivo | Rol |
+|---------|-----|
+| `packages/domain/src/state-explanation.ts` | `primaryEnvironmentalDeviation`, tipos. |
+| `packages/domain/src/calculations.ts` | `tphRemediationDynamics`, `TphRemediationDynamics`. |
+| `packages/domain/src/index.ts` | Reexport. |
+| `packages/domain/src/__tests__/calculations.test.ts` | Tests Vitest asociados. |
+| `apps/web/components/charts/tph-sparkline.tsx` | Sparkline SVG. |
+| `apps/web/components/dashboard/biopila-card.tsx` | Tarjeta. |
+| `apps/web/components/dashboard/dashboard-page-content.tsx` | `tipoUniformeEnBiopila` por biopila. |
+| `apps/web/components/dashboard/biopila-detail-content.tsx` | Copy detalle. |
+
+### 13.6 Criterios de aceptación (QA) — BiopilaCard
+
+- [ ] Con estado **no óptimo**, la tarjeta muestra **variable crítica** coherente con umbrales (misma familia que `classifyBiopilaState`).
+- [ ] Línea **TPH inicial → actual** evita interpretar el TPH actual sin referencia.
+- [ ] Con **≥ 2** mediciones aparece sparkline; con **1** medición no se muestra línea rota o vacía confusa.
+- [ ] **Ritmo reciente** solo aparece cuando el dominio devuelve pendiente válida; si no hay datos, no se muestran cifras inventadas.
+- [ ] **Tipo de hidrocarburo**: subtítulo si uniforme en el historial de la biopila; línea en cuerpo si hay mezcla.
+- [ ] Detalle de biopila usa las mismas convenciones de **tildes** y **tiempo de operación** que la tarjeta/listado.
+
+---
+
+*Fin de la especificación (TPH-8 §1–12; registro BiopilaCard §13).*

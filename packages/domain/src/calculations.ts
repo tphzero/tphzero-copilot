@@ -18,7 +18,7 @@ export function reductionPercent(tphInicial: number, tphActual: number): number 
   return Math.max(0, (tphInicial - tphActual) / tphInicial);
 }
 
-/** Última medición con tiempoDias <= targetDias; si no hay, la primera del historial. */
+/** Última medición con tiempoDias <= targetDias, o null si todas son posteriores a targetDias. */
 export function measurementAtOrBefore(
   measurements: Measurement[],
   targetDias: number
@@ -30,7 +30,7 @@ export function measurementAtOrBefore(
     if (m.tiempoDias <= targetDias) best = m;
     else break;
   }
-  return best ?? sorted[0]!;
+  return best;
 }
 
 /**
@@ -46,14 +46,15 @@ export function buildReductionHorizonOptions(maxDias: number): number[] {
   return [...out].sort((a, b) => a - b);
 }
 
-/** Reducción vs TPH inicial de la biopila usando la medición vigente al instante targetDias. */
+/** Reducción vs TPH inicial usando la medición vigente al instante targetDias; null si no hay medición en o antes de ese día. */
 export function tphReductionAtTiempoDias(
   measurements: Measurement[],
   targetDias: number
-): number {
-  if (measurements.length === 0) return 0;
+): number | null {
+  if (measurements.length === 0) return null;
   const sorted = [...measurements].sort((a, b) => a.tiempoDias - b.tiempoDias);
-  const at = measurementAtOrBefore(measurements, targetDias)!;
+  const at = measurementAtOrBefore(measurements, targetDias);
+  if (!at) return null;
   const tphInicial = sorted[0]!.tphInicialMgkg;
   return reductionPercent(tphInicial, at.tphActualMgkg);
 }
