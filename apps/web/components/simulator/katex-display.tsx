@@ -35,7 +35,7 @@ export function KatexDisplay({ latex, displayMode = true, className }: KatexDisp
     <div
       ref={ref}
       className={cn(
-        '[&_.katex]:!text-zinc-200 [&_.katex_html]:!text-zinc-200',
+        '[&_.katex]:!text-foreground [&_.katex_html]:!text-foreground',
         displayMode && 'overflow-x-auto py-1',
         className
       )}

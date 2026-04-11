@@ -67,7 +67,7 @@ export function BiopilaDetailContent({
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-zinc-500">Cargando...</p>
+        <p className="text-muted-foreground">Cargando...</p>
       </div>
     );
   }
@@ -79,14 +79,14 @@ export function BiopilaDetailContent({
   if (measurements.length === 0) {
     return (
       <div className="space-y-4">
-        <Card className="border-zinc-800 bg-zinc-900">
+        <Card className="border-border bg-card">
           <CardHeader>
             <CardTitle className="font-mono text-lg">Sin mediciones para esta biopila</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-muted-foreground">
               No hay mediciones para la biopila{' '}
-              <span className="font-mono text-zinc-200">{biopilaId}</span> en este dataset.
+              <span className="font-mono text-foreground">{biopilaId}</span> en este dataset.
               Comprueba el identificador o vuelve al dashboard para ver las biopilas disponibles.
             </p>
           </CardContent>
@@ -129,7 +129,7 @@ export function BiopilaDetailContent({
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="font-mono text-2xl font-bold">{biopilaId}</h1>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-muted-foreground">
             {latestMeasurement.tipoHidrocarburo} - {sortedMeasurements.length} mediciones
           </p>
         </div>
@@ -138,9 +138,9 @@ export function BiopilaDetailContent({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {kpis.map(({ label, value }) => (
-          <Card key={label} className="border-zinc-800 bg-zinc-900">
+          <Card key={label} className="border-border bg-card">
             <CardContent className="pt-4">
-              <p className="text-xs text-zinc-500">{label}</p>
+              <p className="text-xs text-muted-foreground">{label}</p>
               <p className="font-mono text-lg font-bold capitalize">{value}</p>
             </CardContent>
           </Card>
@@ -148,7 +148,7 @@ export function BiopilaDetailContent({
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <Card className="border-zinc-800 bg-zinc-900">
+        <Card className="border-border bg-card">
           <CardHeader>
             <CardTitle>Evolucion TPH</CardTitle>
           </CardHeader>
@@ -156,7 +156,7 @@ export function BiopilaDetailContent({
             <TPHTimeline data={sortedMeasurements} />
           </CardContent>
         </Card>
-        <Card className="border-zinc-800 bg-zinc-900">
+        <Card className="border-border bg-card">
           <CardHeader>
             <CardTitle>Variables ambientales</CardTitle>
           </CardHeader>
@@ -166,14 +166,14 @@ export function BiopilaDetailContent({
         </Card>
       </div>
 
-      <Card className="border-zinc-800 bg-zinc-900">
+      <Card className="border-border bg-card">
         <CardHeader>
           <CardTitle>Mediciones</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow className="border-zinc-800">
+              <TableRow className="border-border">
                 <TableHead className="font-mono text-xs">Dia</TableHead>
                 <TableHead className="font-mono text-xs">TPH (mg/kg)</TableHead>
                 <TableHead className="font-mono text-xs">Reduccion</TableHead>
@@ -185,7 +185,7 @@ export function BiopilaDetailContent({
             </TableHeader>
             <TableBody>
               {sortedMeasurements.map((measurement) => (
-                <TableRow key={measurement.id} className="border-zinc-800">
+                <TableRow key={measurement.id} className="border-border">
                   <TableCell className="font-mono text-xs">
                     {measurement.tiempoDias}
                   </TableCell>

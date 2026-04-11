@@ -84,14 +84,14 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-semibold">Cargar datos</h2>
-              <p className="text-sm text-zinc-400">
+              <p className="text-sm text-muted-foreground">
                 Selecciona un archivo CSV o Excel con los datos de biorremediacion
               </p>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="text-zinc-500 hover:text-zinc-300"
+              className="text-muted-foreground hover:text-foreground"
               onClick={() => setShowUpload(false)}
             >
               Cancelar
@@ -110,7 +110,7 @@ export default function HomePage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1.5 border-zinc-700 text-xs hover:border-zinc-500"
+                className="gap-1.5 border-border text-xs hover:border-border"
                 onClick={handleUploadClick}
               >
                 <Upload className="h-3.5 w-3.5" />

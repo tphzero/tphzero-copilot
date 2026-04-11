@@ -1,33 +1,88 @@
 # TPHZero Copilot
 
-TPHZero Copilot es una plataforma web para monitorear procesos de biorremediacion de suelos contaminados con hidrocarburos. Combina modelos matematicos, visualizacion de series temporales y herramientas de IA para ayudar a analizar biopilas, detectar anomalias, proyectar reduccion de TPH y simular escenarios operativos.
+TPHZero Copilot es una plataforma web para monitoreo y soporte operativo de procesos de biorremediacion de suelos con hidrocarburos (TPH). Centraliza datos de campo, genera indicadores, habilita analisis asistido por IA y permite simulacion de escenarios what-if.
 
-## Que resuelve
+## 1. Que hace y para que sirve
 
-En procesos reales de biorremediacion, variables como humedad, temperatura, oxigeno, pH y nutrientes afectan directamente la velocidad de degradacion del contaminante. En muchos contextos esto se gestiona de forma empirica. TPHZero Copilot centraliza datos, calcula indicadores y usa IA para convertir resultados numericos en diagnosticos y recomendaciones accionables.
+La aplicacion ayuda a equipos tecnicos a:
+- Cargar datasets operativos desde CSV/Excel.
+- Visualizar estado de biopilas por dataset.
+- Identificar condiciones optimas, suboptimas y criticas.
+- Analizar tendencias historicas de TPH y variables ambientales.
+- Consultar hallazgos mediante chat IA.
+- Simular ajustes operativos para estimar impacto en la reduccion de TPH.
 
-## Funcionalidades implementadas
+Contexto de uso principal: trabajo de campo y seguimiento tecnico-operativo.
 
-- Carga de archivos CSV y Excel con validacion de columnas.
+## 2. Funcionalidades principales
+
+### 2.1 Carga y gestion de datos
+- Upload de archivos `.csv`, `.xlsx`, `.xls`.
+- Parsing y validacion de columnas.
 - Persistencia de datasets y mediciones en Supabase.
-- Dashboard con KPIs, cards por biopila y graficos de evolucion.
-- Vista de detalle por biopila con timeline, variables ambientales y tabla de mediciones.
-- Chat con AI SDK v6 y Google Gemini para consultar estado, correlaciones, anomalias, predicciones y simulaciones.
-- Simulador what-if para ajustar variables operativas y comparar linea base vs. escenario ajustado.
+- Historial de datasets con seleccion de dataset activo.
 
-## Stack tecnico
+### 2.2 Dashboard
+- KPIs operativos (biopilas activas, reduccion promedio, estados).
+- Cards por biopila con metricas resumidas.
+- Graficos de evolucion de TPH y reduccion por biopila.
+- Navegacion por dataset y detalle de biopilas.
+
+### 2.3 Detalle de biopila
+- Estado actual con indicador semantico.
+- KPIs de la biopila.
+- Series temporales (TPH + variables ambientales).
+- Tabla de mediciones historicas.
+
+### 2.4 Chat IA
+- Endpoint `/api/chat` con AI SDK v6 + Google Gemini.
+- Respuestas contextualizadas sobre dataset/biopilas.
+- Soporte para analisis, interpretacion y recomendaciones.
+
+### 2.5 Simulador what-if
+- Ajuste de variables operativas con sliders.
+- Comparacion linea base vs escenario simulado.
+- Explicacion tecnica de cinetica y factores.
+- Endpoint `/api/simulator/explain` para interpretacion IA del escenario.
+
+## 3. Accesibilidad y UX de campo
+
+La app incorpora funciones orientadas a legibilidad en entornos exigentes (luz variable, uso prolongado):
+
+### 3.1 Tema claro/oscuro
+- Switch de tema en sidebar.
+- Persistencia con `next-themes`.
+- Aplicacion global de tokens semanticos (no colores fijos por componente).
+
+### 3.2 Preset de alto contraste (Campo)
+- Toggle dedicado `Alto contraste` en sidebar.
+- Persiste en `localStorage` con clave `tphzero-contrast-preset`.
+- Valor activo: `field`.
+- Aplica clase/atributo en `html` (`field-hc` y `data-contrast-preset='field'`).
+- Refuerza contraste de:
+  - texto principal/secundario,
+  - bordes e inputs,
+  - superficies (`background`, `card`, `muted`),
+  - colores de estado (optimo/suboptimo/critico).
+
+### 3.3 Mejoras de contraste implementadas
+- Migracion de estilos hardcodeados (`zinc`, `white/black`) a tokens semanticos.
+- Tooltips y ejes de graficos adaptados al tema.
+- Breadcrumbs y elementos de navegacion con contraste reforzado.
+
+## 4. Stack tecnico
 
 - Monorepo: Turborepo
-- Frontend: Next.js App Router
-- UI: Tailwind CSS + shadcn/ui + Base UI
+- Frontend: Next.js (App Router)
+- UI: Tailwind CSS v4 + shadcn/ui + Base UI
 - Charts: Recharts
-- AI: Vercel AI SDK v6 + `@ai-sdk/google`
-- Modelos numericos: `simple-statistics`
-- Parsing de archivos: Papa Parse + SheetJS
-- Base de datos: Supabase
-- Deploy: Vercel
+- IA: AI SDK v6 (`ai`, `@ai-sdk/react`, `@ai-sdk/google`)
+- Data parsing: Papa Parse, SheetJS (`xlsx`)
+- DB: Supabase
+- Shared domain: `packages/domain`
+- Tests: Vitest
 
-## Estructura del repo
+## 5. Estructura relevante
 
 ```text
 tphzero-copilot/
@@ -35,78 +90,41 @@ tphzero-copilot/
 |   `-- web/
 |       |-- app/
 |       |   |-- api/
-|       |   |-- biopila/[id]/
+|       |   |-- datasets/[datasetId]/
 |       |   |-- chat/
-|       |   |-- dashboard/
-|       |   `-- simulator/
-|       |-- components/
-|       |   |-- charts/
-|       |   |-- chat/
-|       |   |-- dashboard/
-|       |   |-- layout/
 |       |   |-- simulator/
-|       |   |-- ui/
-|       |   `-- upload/
+|       |   `-- layout.tsx
+|       |-- components/
+|       |   |-- dashboard/
+|       |   |-- simulator/
+|       |   |-- charts/
+|       |   |-- layout/
+|       |   `-- ui/
 |       `-- lib/
-|           |-- ai/
-|           |-- data/
-|           `-- models/
-|-- docs/
 |-- packages/
 |   `-- domain/
-|-- supabase/
-|   `-- migrations/
-`-- vercel.json
+|-- docs/
+`-- supabase/
 ```
 
-## Como funciona
+## 6. Endpoints principales
 
-### 1. Carga de datos
+- `POST /api/upload` -> carga y parseo de dataset
+- `GET /api/data` -> listado de datasets
+- `GET /api/data/[datasetId]` -> detalle del dataset y mediciones
+- `DELETE /api/data/[datasetId]` -> elimina dataset
+- `POST /api/chat` -> chat IA
+- `POST /api/simulator/explain` -> explicacion IA del simulador
 
-La pagina principal permite subir un CSV o Excel. El backend:
+## 7. Variables de entorno
 
-- valida columnas esperadas,
-- detecta si el dataset es nivel 1 o nivel 2,
-- crea un registro en `datasets`,
-- inserta las mediciones normalizadas en `measurements`.
+Template oficial: `apps/web/.env.local.example`
 
-### 2. Dashboard
+Archivo efectivo para la app web: `apps/web/.env.local`
 
-El dashboard toma el dataset mas reciente y:
-
-- calcula reduccion promedio,
-- agrupa mediciones por `biopila_id`,
-- clasifica el estado de cada biopila,
-- muestra la evolucion de TPH y reduccion por biopila.
-
-### 3. Analisis por biopila
-
-Cada biopila tiene una vista de detalle con:
-
-- estado actual,
-- metricas clave,
-- serie temporal de TPH,
-- serie temporal de variables ambientales,
-- tabla de mediciones historicas.
-
-### 4. Chat IA
-
-El endpoint `/api/chat` usa AI SDK v6 con tools server-side para:
-
-- clasificar estado,
-- calcular correlaciones,
-- detectar anomalias,
-- proyectar TPH,
-- simular escenarios,
-- resumir el dataset mas reciente.
-
-### 5. Simulador
-
-El simulador toma una biopila del dataset mas reciente, inicializa sliders con la ultima medicion y proyecta TPH con cinética exponencial ajustada al historial; el escenario simulado escala la tasa con factores operativos (Q10, Monod, humedad, volteo) respecto a esa medicion. Ver `simulateScenario` y `simulator-kinetics.ts`.
-
-## Variables de entorno
-
-El proyecto usa estas variables:
+Nota importante:
+- `apps/web/.env.local` es el archivo que usa Next.js para `apps/web`.
+- `/.env` en raiz queda reservado para tooling/monorepo y no reemplaza al de `apps/web`.
 
 ```env
 GOOGLE_GENERATIVE_AI_API_KEY=
@@ -115,75 +133,70 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-La plantilla esta en `.env.local.example`.
+## 8. Como correr el proyecto
 
-## Desarrollo local
-
-Instala dependencias:
-
+### 8.1 Instalacion
 ```bash
 npm install
 ```
 
-Levanta el proyecto:
-
+### 8.2 Desarrollo (monorepo)
 ```bash
 npm run dev
 ```
 
-**Supabase local (`dev:local` / `dev:local:fresh`):** antes comenta las variables de Supabase **cloud** en `apps/web/.env` y/o `.env.local` para que no pisen las inyectadas por el script (detalle en `docs/LOCAL-DATABASE.md`).
+### 8.3 Desarrollo solo web
+```bash
+npm run -w web dev
+```
 
-Build del monorepo:
+### 8.4 Desarrollo con Supabase local (opcional)
+- `npm run dev:local` -> arranca Supabase local + app (conserva datos locales).
+- `npm run dev:local:fresh` -> idem, pero resetea DB local.
+- `npm run stop:local` -> detiene servicios locales de Supabase.
 
+Detalle: `docs/LOCAL-DATABASE.md`.
+
+### 8.5 Build
 ```bash
 npm run build
 ```
 
-## Scripts principales
+### 8.6 Tests
+```bash
+npm run -w web test
+```
 
-En la raiz:
+## 9. Estado actual y analisis de la aplicacion
 
-- `npm run dev` — desarrollo con **Supabase cloud** (o las variables que tengas en `apps/web/.env`).
-- `npm run dev:local` — **Supabase en Docker** local: `supabase start` + inyección automática de URL/claves + `npm run dev` (no borra la DB).
-- `npm run dev:local:fresh` — igual que `dev:local` pero ejecuta **`db reset`** (aplica migraciones; **borra datos locales**). Útil la primera vez o tras cambiar el esquema.
-- `npm run stop:local` — `supabase stop` (apaga la stack local; la app se detiene con Ctrl+C).
-- `npm run build`
-- `npm run lint`
-- `npm run test`
-- `npm run db:start` / `db:stop` / `db:reset` / `db:status` (pasos sueltos; requiere Docker para local)
+### 9.1 Fortalezas
+- Flujo completo de datos: carga -> analisis -> simulacion.
+- Modelo de UI consistente por tokens semanticos.
+- Accesibilidad reforzada con claro/oscuro + preset de alto contraste.
+- Arquitectura modular por dominio y componentes.
+- Base solida para evolucion funcional y despliegue.
 
-Detalle: `docs/LOCAL-DATABASE.md`.
+### 9.2 Riesgos o puntos a vigilar
+- `next lint` en este repo aun depende de configuracion interactiva inicial.
+- El rendimiento en datasets muy grandes requiere pruebas de escala.
+- La interpretacion IA debe seguir validada por criterio tecnico de campo.
 
-En `apps/web`:
+### 9.3 Siguientes pasos recomendados
+1. Agregar modo "Alto contraste" como preferencia visible tambien en header/perfil.
+2. Incorporar guia de QA visual automatizada (snapshots por tema/preset).
+3. Definir politicas de calidad de datos y validaciones mas estrictas por tipo de dataset.
+4. Extender observabilidad (errores API, tiempos de respuesta, metricas de uso).
 
-- `npm run dev`
-- `npm run build`
-- `npm run start`
-- `npm run lint`
-
-## Base de datos
+## 10. Documentacion complementaria
 
 Las migraciones SQL estan en `supabase/migrations/` (formato con timestamp, p. ej. `20260408000000_initial_schema.sql`). Tablas principales: `datasets`, `measurements`.
-
-**Desarrollo con Postgres/API local (Docker):** `npm run dev:local` / `dev:local:fresh` o pasos manuales en `docs/LOCAL-DATABASE.md`.
-
-## Documentacion adicional
 
 - Setup general: `docs/SETUP.md`
 - Base de datos local (Supabase CLI): `docs/LOCAL-DATABASE.md`
 - Deploy paso a paso: `docs/DEPLOY-VERCEL-SUPABASE-GEMINI.md`
 - Especificacion funcional: `SPEC.md`
-- Plan de implementacion: `docs/plans/2026-03-21-tphzero-copilot.md`
+- Planes de trabajo: `docs/plans/`
 
-## Estado actual
+---
 
-El MVP ya incluye:
-
-- upload y parsing de datasets,
-- dashboard,
-- detalle por biopila,
-- chat IA,
-- simulador,
-- configuracion base de Vercel.
-
-Lo siguiente natural es endurecer persistencia de conversaciones, mejorar auth, y extender la capa de modelos para datasets mas grandes y mas casos de uso operativos.
+Si necesitas onboarding rapido para nuevos colaboradores, este README es la fuente principal y `docs/SETUP.md` cubre el paso a paso operativo.

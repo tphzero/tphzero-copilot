@@ -45,24 +45,26 @@ export function TPHTimeline({ data, biopilaIds }: TPHTimelineProps) {
     return (
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData}>
-          <CartesianGrid stroke="#27272a" strokeDasharray="3 3" />
+          <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
           <XAxis
             dataKey="dia"
-            stroke="#71717a"
+            stroke="var(--muted-foreground)"
             fontSize={12}
-            label={{ value: 'Dias', position: 'bottom', fill: '#71717a' }}
+            label={{ value: 'Dias', position: 'bottom', fill: 'var(--muted-foreground)' }}
           />
           <YAxis
-            stroke="#71717a"
+            stroke="var(--muted-foreground)"
             fontSize={12}
             tickFormatter={(value: number) => `${(value / 1000).toFixed(0)}k`}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#18181b',
-              border: '1px solid #3f3f46',
+              backgroundColor: 'var(--card)',
+              border: '1px solid var(--border)',
               borderRadius: '8px',
             }}
+            labelStyle={{ color: 'var(--foreground)' }}
+            itemStyle={{ color: 'var(--foreground)' }}
             labelFormatter={(value) => `Dia ${value}`}
             formatter={(value) => formatTooltipValue(value, 'TPH')}
           />
@@ -106,23 +108,25 @@ export function TPHTimeline({ data, biopilaIds }: TPHTimelineProps) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={chartData}>
-        <CartesianGrid stroke="#27272a" strokeDasharray="3 3" />
-        <XAxis dataKey="dia" stroke="#71717a" fontSize={12} />
+        <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
+        <XAxis dataKey="dia" stroke="var(--muted-foreground)" fontSize={12} />
         <YAxis
-          stroke="#71717a"
+          stroke="var(--muted-foreground)"
           fontSize={12}
           tickFormatter={(value: number) => `${(value / 1000).toFixed(0)}k`}
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: '#18181b',
-            border: '1px solid #3f3f46',
+            backgroundColor: 'var(--card)',
+            border: '1px solid var(--border)',
             borderRadius: '8px',
           }}
+          labelStyle={{ color: 'var(--foreground)' }}
+          itemStyle={{ color: 'var(--foreground)' }}
           labelFormatter={(value) => `Dia ${value}`}
           formatter={(value, name) => formatTooltipValue(value, String(name))}
         />
-        <Legend />
+        <Legend wrapperStyle={{ color: 'var(--foreground)' }} />
         {biopilaIds.map((id, index) => (
           <Line
             key={id}

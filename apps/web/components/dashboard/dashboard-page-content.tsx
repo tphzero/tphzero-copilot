@@ -54,7 +54,7 @@ export function DashboardPageContent({ datasetId }: { datasetId: string }) {
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-zinc-500">Cargando datos...</p>
+        <p className="text-muted-foreground">Cargando datos...</p>
       </div>
     );
   }
@@ -66,12 +66,12 @@ export function DashboardPageContent({ datasetId }: { datasetId: string }) {
   if (measurements.length === 0) {
     return (
       <div className="space-y-6">
-        <Card className="border-zinc-800 bg-zinc-900">
+        <Card className="border-border bg-card">
           <CardHeader>
             <CardTitle>Sin mediciones disponibles</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-muted-foreground">
               Carga un dataset para visualizar el dashboard de biopilas.
             </p>
           </CardContent>
@@ -119,7 +119,7 @@ export function DashboardPageContent({ datasetId }: { datasetId: string }) {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-sm text-zinc-400">
+        <p className="text-sm text-muted-foreground">
           Vista general del dataset actual y del estado operativo.
         </p>
       </div>
@@ -146,7 +146,7 @@ export function DashboardPageContent({ datasetId }: { datasetId: string }) {
         </>
       ) : (
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
-          <Card className="border-zinc-800 bg-zinc-900">
+          <Card className="border-border bg-card">
             <CardHeader>
               <CardTitle>Evolucion de TPH</CardTitle>
             </CardHeader>
@@ -154,12 +154,12 @@ export function DashboardPageContent({ datasetId }: { datasetId: string }) {
               <TPHTimeline data={measurements} />
             </CardContent>
           </Card>
-          <Card className="border-zinc-800 bg-zinc-900">
+          <Card className="border-border bg-card">
             <CardHeader>
               <CardTitle>Dataset sin identificador de biopila</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-zinc-400">
+              <p className="text-sm text-muted-foreground">
                 El dataset cargado no incluye `biopila_id`, por lo que el detalle
                 por biopila se habilitara cuando se carguen mediciones de nivel 2.
               </p>

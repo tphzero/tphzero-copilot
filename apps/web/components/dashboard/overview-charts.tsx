@@ -49,7 +49,7 @@ export function OverviewCharts({ biopilas }: OverviewChartsProps) {
 
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
-      <Card className="border-zinc-800 bg-zinc-900">
+      <Card className="border-border bg-card">
         <CardHeader>
           <CardTitle>Evolucion de TPH</CardTitle>
         </CardHeader>
@@ -61,28 +61,30 @@ export function OverviewCharts({ biopilas }: OverviewChartsProps) {
         </CardContent>
       </Card>
 
-      <Card className="border-zinc-800 bg-zinc-900">
+      <Card className="border-border bg-card">
         <CardHeader>
           <CardTitle>Reduccion por biopila</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={reductionData} layout="vertical" margin={{ left: 8 }}>
-              <CartesianGrid stroke="#27272a" strokeDasharray="3 3" />
-              <XAxis type="number" stroke="#71717a" fontSize={12} unit="%" />
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
+              <XAxis type="number" stroke="var(--muted-foreground)" fontSize={12} unit="%" />
               <YAxis
                 dataKey="id"
                 type="category"
-                stroke="#71717a"
+                stroke="var(--muted-foreground)"
                 fontSize={12}
                 width={72}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#18181b',
-                  border: '1px solid #3f3f46',
+                  backgroundColor: 'var(--card)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                 }}
+                labelStyle={{ color: 'var(--foreground)' }}
+                itemStyle={{ color: 'var(--foreground)' }}
                 formatter={(value) => formatReductionValue(value)}
               />
               <Bar dataKey="reduccion" radius={[0, 6, 6, 0]}>
