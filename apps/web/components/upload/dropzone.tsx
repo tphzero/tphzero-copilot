@@ -77,7 +77,7 @@ export function Dropzone({ onFileUploaded }: DropzoneProps) {
           'flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-12 transition-colors',
           isDragActive
             ? 'border-emerald-500 bg-emerald-500/10'
-            : 'border-zinc-700 hover:border-zinc-500',
+            : 'border-border hover:border-foreground/30',
           uploading && 'cursor-not-allowed opacity-50'
         )}
       >
@@ -87,9 +87,9 @@ export function Dropzone({ onFileUploaded }: DropzoneProps) {
         ) : isDragActive ? (
           <FileCheck className="h-8 w-8 text-emerald-400" />
         ) : (
-          <Upload className="h-8 w-8 text-zinc-500" />
+          <Upload className="h-8 w-8 text-muted-foreground" />
         )}
-        <p className="text-center text-sm text-zinc-400">
+        <p className="text-center text-sm text-muted-foreground">
           {uploading
             ? 'Procesando archivo...'
             : isDragActive

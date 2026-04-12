@@ -33,7 +33,7 @@ export function KatexInline({ latex, className }: KatexInlineProps) {
     <span
       ref={ref}
       className={cn(
-        'inline-block align-baseline [&_.katex]:!text-[0.95em] [&_.katex]:!text-zinc-200',
+        'inline-block align-baseline [&_.katex]:!text-[0.95em] [&_.katex]:!text-foreground',
         className
       )}
     />

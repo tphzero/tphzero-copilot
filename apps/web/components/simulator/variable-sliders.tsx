@@ -84,7 +84,7 @@ export function VariableSliders({ values, onChange }: VariableSlidersProps) {
       {SLIDERS.map(({ key, label, unitLatex, min, max, step }) => (
         <div key={key} className="space-y-2">
           <div className="flex items-center justify-between gap-4">
-            <Label className="text-sm text-zinc-400">{label}</Label>
+            <Label className="text-sm text-muted-foreground">{label}</Label>
             <span className="flex items-baseline gap-1.5 font-mono text-sm text-emerald-400">
               <span>{(values[key] ?? (min + max) / 2).toFixed(step < 1 ? 1 : 0)}</span>
               <KatexInline latex={unitLatex} />

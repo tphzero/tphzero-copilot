@@ -99,12 +99,12 @@ export function ComparisonChart({
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div className="space-y-1">
-          <Label className="text-xs text-zinc-500">Rango temporal (vista)</Label>
+          <Label className="text-xs text-muted-foreground">Rango temporal (vista)</Label>
           <Select
             value={preset}
             onValueChange={(v) => setPreset((v as TimeRangePreset) ?? 'full')}
           >
-            <SelectTrigger className="w-full border-zinc-700 bg-zinc-800 sm:w-[220px]">
+            <SelectTrigger className="w-full border-border bg-background sm:w-[220px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -118,33 +118,33 @@ export function ComparisonChart({
         </div>
 
         <div className="flex flex-wrap gap-4">
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-300">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground/85">
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-zinc-600 bg-zinc-800"
+              className="h-4 w-4 rounded border-border bg-background"
               checked={showBaseline}
               onChange={(e) => setShowBaseline(e.target.checked)}
             />
             <span
-              className="h-0 w-8 shrink-0 border-t-2 border-dashed border-zinc-400"
+              className="h-0 w-8 shrink-0 border-t-2 border-dashed border-muted-foreground"
               aria-hidden
             />
             <span>Linea base</span>
           </label>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-300">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground/85">
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-zinc-600 bg-zinc-800"
+              className="h-4 w-4 rounded border-border bg-background"
               checked={showSimulated}
               onChange={(e) => setShowSimulated(e.target.checked)}
             />
             <span className="h-0 w-8 shrink-0 border-t-2 border-emerald-400" aria-hidden />
             <span>Proyeccion simulada</span>
           </label>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-300">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground/85">
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-zinc-600 bg-zinc-800"
+              className="h-4 w-4 rounded border-border bg-background"
               checked={showObserved}
               onChange={(e) => setShowObserved(e.target.checked)}
             />
@@ -159,8 +159,8 @@ export function ComparisonChart({
       </div>
 
       {empty ? (
-        <div className="flex h-[280px] items-center justify-center rounded border border-dashed border-zinc-700 bg-zinc-950/50">
-          <p className="text-sm text-zinc-500">No hay puntos en este rango.</p>
+        <div className="flex h-[280px] items-center justify-center rounded border border-dashed border-border bg-background/50">
+          <p className="text-sm text-muted-foreground">No hay puntos en este rango.</p>
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={350}>
@@ -168,37 +168,39 @@ export function ComparisonChart({
             data={data}
             margin={{ top: 8, right: 12, bottom: 8, left: 4 }}
           >
-            <CartesianGrid stroke="#27272a" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
             <XAxis
               dataKey="dia"
-              stroke="#71717a"
+              stroke="var(--muted-foreground)"
               fontSize={12}
               tickMargin={8}
               height={52}
               label={{
                 value: 't (d)',
                 position: 'insideBottom',
-                fill: '#a1a1aa',
+                fill: 'var(--muted-foreground)',
                 offset: -4,
               }}
             />
             <YAxis
-              stroke="#71717a"
+              stroke="var(--muted-foreground)"
               fontSize={12}
               tickFormatter={formatYTick}
               label={{
                 value: 'TPH',
                 angle: -90,
                 position: 'insideLeft',
-                fill: '#71717a',
+                fill: 'var(--muted-foreground)',
               }}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#18181b',
-                border: '1px solid #3f3f46',
+                backgroundColor: 'var(--card)',
+                border: '1px solid var(--border)',
                 borderRadius: '8px',
               }}
+              labelStyle={{ color: 'var(--foreground)' }}
+              itemStyle={{ color: 'var(--foreground)' }}
               labelFormatter={(value) => `t = ${value} d`}
               formatter={(value, name) => {
                 if (value === null || value === undefined) return null;
@@ -212,7 +214,8 @@ export function ComparisonChart({
                 type="monotone"
                 dataKey="baseline"
                 name="Linea base"
-                stroke="#a1a1aa"
+                stroke="var(--muted-foreground)"
+                strokeOpacity={0.9}
                 strokeWidth={2}
                 strokeDasharray="6 4"
                 dot={false}
@@ -266,7 +269,7 @@ export function ComparisonChart({
       )}
       {!empty ? (
         <LatexMarkdown
-          className="text-center text-xs text-zinc-500"
+          className="text-center text-xs text-muted-foreground"
           content={
             'Ejes: tiempo $t$ desde el inicio ($\\mathrm{d}$); eje vertical: $\\mathrm{TPH}$ ' +
             '($\\mathrm{mg\\,kg}^{-1}$). **Observado:** mediciones reales; tramo en azul = interpolacion lineal ' +

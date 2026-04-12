@@ -215,7 +215,7 @@ export default function SimulatorPage() {
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-zinc-500">Cargando datos...</p>
+        <p className="text-muted-foreground">Cargando datos...</p>
       </div>
     );
   }
@@ -223,12 +223,12 @@ export default function SimulatorPage() {
   if (allMeasurements.length === 0) {
     return (
       <div className="space-y-6 p-6">
-        <Card className="border-zinc-800 bg-zinc-900">
+        <Card className="border-border bg-card">
           <CardHeader>
             <CardTitle>Sin datos para simular</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-muted-foreground">
               Carga un dataset para probar escenarios operativos.
             </p>
           </CardContent>
@@ -240,12 +240,12 @@ export default function SimulatorPage() {
   if (biopilaIds.length === 0) {
     return (
       <div className="space-y-6 p-6">
-        <Card className="border-zinc-800 bg-zinc-900">
+        <Card className="border-border bg-card">
           <CardHeader>
             <CardTitle>Simulador disponible solo para datasets con biopila_id</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-muted-foreground">
               El simulador requiere mediciones por biopila para comparar escenarios.
             </p>
           </CardContent>
@@ -259,7 +259,7 @@ export default function SimulatorPage() {
       <div>
         <h1 className="text-2xl font-bold">Simulador What-If</h1>
         <LatexMarkdown
-          className="text-sm text-zinc-400"
+          className="text-sm text-muted-foreground"
           content={
             'Modifica variables operativas y observa como cambia la proyeccion de $\\mathrm{TPH}$. ' +
             'La **linea base** usa solo el historial ($k$ desde $\\ln(\\mathrm{TPH}/\\mathrm{TPH}_0)$ vs $t$). ' +
@@ -270,18 +270,18 @@ export default function SimulatorPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <Card className="border-zinc-800 bg-zinc-900 xl:col-span-1">
+        <Card className="border-border bg-card xl:col-span-1">
           <CardHeader>
             <CardTitle className="text-base">Variables operativas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm text-zinc-400">Biopila</label>
+              <label className="text-sm text-muted-foreground">Biopila</label>
               <Select
                 value={selectedBiopila}
                 onValueChange={(value) => setSelectedBiopila(value ?? '')}
               >
-                <SelectTrigger className="w-full border-zinc-700 bg-zinc-800">
+                <SelectTrigger className="w-full border-border bg-card">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -314,7 +314,7 @@ export default function SimulatorPage() {
               <Button
                 onClick={resetValues}
                 variant="outline"
-                className="flex-1 border-zinc-700"
+                className="flex-1 border-border"
               >
                 <RotateCcw className="mr-2 h-4 w-4" />
                 Restablecer a ultima medicion
@@ -322,7 +322,7 @@ export default function SimulatorPage() {
             </div>
 
             {selectedMeasurements.length < 2 ? (
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-muted-foreground">
                 Se necesitan al menos 2 mediciones para simular esta biopila.
               </p>
             ) : null}
@@ -344,11 +344,11 @@ export default function SimulatorPage() {
 
               {result ? (
                 <>
-                  <Card className="border-zinc-800 bg-zinc-900">
+                  <Card className="border-border bg-card">
                     <CardHeader>
                       <CardTitle>Comparacion: linea base vs. simulado</CardTitle>
                       <LatexMarkdown
-                        className="text-xs text-zinc-500"
+                        className="text-xs text-muted-foreground"
                         content={`**Horizonte extra de proyeccion:** $H = ${result.horizonDays}~\mathrm{d}$ (variante \`${result.modelId}\`).`}
                       />
                     </CardHeader>
@@ -358,10 +358,10 @@ export default function SimulatorPage() {
                   </Card>
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <Card className="border-zinc-800 bg-zinc-900">
+                    <Card className="border-border bg-card">
                       <CardContent className="pt-6">
                         <LatexMarkdown
-                          className="text-xs text-zinc-500"
+                          className="text-xs text-muted-foreground"
                           content="**Ventaja maxima en reduccion** (respecto a $\\mathrm{TPH}_0$)"
                         />
                         <p className="mt-1 font-mono text-2xl font-bold text-emerald-400">
@@ -369,17 +369,17 @@ export default function SimulatorPage() {
                           {result.deltaReductionPct.toFixed(1)} pp
                         </p>
                         <LatexMarkdown
-                          className="mt-2 text-xs leading-snug text-zinc-600"
+                          className="mt-2 text-xs leading-snug text-muted-foreground"
                           content={
                             'Maximo a lo largo de la curva en **puntos porcentuales** del $\\mathrm{TPH}$ inicial; donde la proyeccion simulada mas se separa de la base.'
                           }
                         />
                       </CardContent>
                     </Card>
-                    <Card className="border-zinc-800 bg-zinc-900">
+                    <Card className="border-border bg-card">
                       <CardContent className="pt-6">
                         <LatexMarkdown
-                          className="text-xs text-zinc-500"
+                          className="text-xs text-muted-foreground"
                           content="**Tiempo ahorrado** (estimado, $\\mathrm{d}$)"
                         />
                         <p className="mt-1 font-mono text-2xl font-bold text-blue-400">
@@ -388,7 +388,7 @@ export default function SimulatorPage() {
                             : 'N/A'}
                         </p>
                         <LatexMarkdown
-                          className="mt-2 text-xs leading-snug text-zinc-600"
+                          className="mt-2 text-xs leading-snug text-muted-foreground"
                           content={
                             '$\\Delta t$ hasta alcanzar el $90\\%$ de reduccion de $\\mathrm{TPH}$ respecto al inicial (meta del modelo), comparando curvas proyectadas.'
                           }
@@ -412,8 +412,8 @@ export default function SimulatorPage() {
               ) : null}
             </>
           ) : (
-            <Card className="flex h-64 items-center justify-center border-zinc-800 bg-zinc-900">
-              <p className="max-w-md text-center text-zinc-500">
+            <Card className="flex h-64 items-center justify-center border-border bg-card">
+              <p className="max-w-md text-center text-muted-foreground">
                 Se necesitan al menos dos mediciones para esta biopila.
               </p>
             </Card>

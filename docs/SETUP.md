@@ -19,7 +19,8 @@ npm install
 
 1. Crea un proyecto en [supabase.com](https://supabase.com).
 2. Abre el SQL Editor.
-3. Ejecuta el contenido de la migracion inicial en `supabase/migrations/` (archivo `*_initial_schema.sql`), o usa el SQL Editor con el mismo DDL.
+3. Ejecuta la migracion principal en `supabase/migrations/001_initial_schema.sql`.
+3. Ejecuta la migracion inicial de `supabase/migrations/` (archivo con sufijo `_initial_schema.sql`).
 4. Copia estas credenciales desde `Project Settings > API`:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -27,13 +28,25 @@ npm install
 
 ## 3. Configurar variables de entorno
 
-Parte de la plantilla incluida en `.env.local.example`.
+Para esta aplicacion, **el archivo que usa Next.js es**:
+- `apps/web/.env.local`
 
-```bash
-cp .env.local.example apps/web/.env.local
+La plantilla oficial esta en:
+- `apps/web/.env.local.example`
+
+### 3.1 Crear `apps/web/.env.local`
+
+Desde la raiz del repo (`tphzero-copilot/`), en PowerShell:
+
+```powershell
+Copy-Item apps/web/.env.local.example apps/web/.env.local
 ```
 
-Luego edita `apps/web/.env.local` con tus valores reales:
+Alternativa (si no queres comando): crear manualmente el archivo `apps/web/.env.local` y copiar el contenido de `apps/web/.env.local.example`.
+
+### 3.2 Completar variables requeridas
+
+Edita `apps/web/.env.local` y completa:
 
 ```env
 GOOGLE_GENERATIVE_AI_API_KEY=tu-api-key-de-gemini
@@ -41,6 +54,14 @@ NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
 SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
 ```
+
+### 3.3 Importante: diferencia entre `/.env` y `apps/web/.env.local`
+
+- `apps/web/.env.local`: **siempre** es la fuente principal para ejecutar la app web (`next dev`, `next build`) del workspace `apps/web`.
+- `/.env` (raiz del monorepo): puede existir para otros usos locales, pero **no reemplaza** a `apps/web/.env.local` para la app de Next.js.
+- Si corres `npm run dev` desde la raiz (Turborepo), el proceso web sigue leyendo `apps/web/.env.local`.
+
+En resumen: para evitar errores, manten las claves operativas en `apps/web/.env.local`.
 
 ## 4. Ejecutar en desarrollo
 
@@ -50,7 +71,11 @@ Desde la raiz del monorepo:
 npm run dev
 ```
 
-Esto arranca el workspace `apps/web` a traves de Turborepo.
+O solo el workspace web:
+
+```bash
+npm run -w web dev
+```
 
 Abre:
 
@@ -60,27 +85,50 @@ http://localhost:3000
 
 ### Base de datos en localhost (Docker)
 
-- **Todo automático:** `npm run dev:local` (día a día) o `npm run dev:local:fresh` (primera vez o tras cambiar migraciones). **Antes** de usarlos, comenta las variables de Supabase cloud en `apps/web/.env` / `.env.local` (el script no escribe esos archivos). Detalle: `docs/LOCAL-DATABASE.md` → *Antes de dev:local*.
-- **Pasos manuales** (`db:start`, `db:reset`, copiar claves): también en ese documento.
+- `npm run dev:local` (día a día) o `npm run dev:local:fresh` (reset local completo).
+- Detalle operativo: `docs/LOCAL-DATABASE.md`.
 
-## 5. Validar build local
+## 5. Verificaciones recomendadas
+
+Typecheck:
+
+```bash
+npx tsc -p apps/web/tsconfig.json --noEmit
+```
+
+Tests:
+
+```bash
+npm run -w web test
+```
+
+Build:
 
 ```bash
 npm run build
 ```
 
-Si faltan variables de entorno, Next.js puede fallar al recolectar datos para las rutas API.
+## 6. Smoke test funcional (manual)
 
-## 6. Desplegar en Vercel
+1. Cargar un dataset desde Home.
+2. Entrar a Dashboard y verificar KPIs + graficos.
+3. Abrir detalle de biopila.
+4. Probar Chat IA (`/chat`).
+5. Probar Simulador (`/simulator`).
+6. Verificar accesibilidad visual:
+   - toggle Claro/Oscuro en sidebar,
+   - toggle `Alto contraste` en sidebar (preset campo).
 
-El proyecto ya incluye `vercel.json` con framework `nextjs`.
+## 7. Despliegue en Vercel
+
+El proyecto incluye `vercel.json` con framework `nextjs`.
 
 ```bash
 npm i -g vercel
 vercel
 ```
 
-Configura en Vercel las mismas variables:
+Variables a configurar en Vercel:
 
 - `GOOGLE_GENERATIVE_AI_API_KEY`
 - `NEXT_PUBLIC_SUPABASE_URL`
@@ -89,6 +137,7 @@ Configura en Vercel las mismas variables:
 
 ## Notas
 
-- El frontend, dashboard, chat y simulador viven en `apps/web`.
-- La logica de dominio compartida vive en `packages/domain`.
-- El endpoint de chat usa AI SDK v6 con Google Gemini y requiere la API key configurada.
+- Frontend y API routes viven en `apps/web`.
+- Logica de dominio compartida en `packages/domain`.
+- Chat usa AI SDK v6 con Google Gemini.
+- El preset de alto contraste persiste en `localStorage` con clave `tphzero-contrast-preset`.

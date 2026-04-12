@@ -66,7 +66,7 @@ export function Header() {
   const showBack = Boolean(datasetId && biopilaId);
 
   return (
-    <header className="border-b border-zinc-800 bg-zinc-950/80 px-6 py-4 backdrop-blur">
+    <header className="border-b border-border bg-background/80 px-6 py-4 backdrop-blur">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           {showBack && datasetId ? (
@@ -74,7 +74,7 @@ export function Header() {
               href={datasetDashboardPath(datasetId)}
               className={cn(
                 buttonVariants({ variant: 'outline', size: 'sm' }),
-                'w-fit shrink-0 border-zinc-700'
+                'w-fit shrink-0 border-border'
               )}
             >
               <ArrowLeft className="mr-2 h-4 w-4" aria-hidden />
@@ -82,19 +82,19 @@ export function Header() {
             </Link>
           ) : null}
           <div className="min-w-0 space-y-1">
-            <p className="text-xs font-medium uppercase tracking-[0.24em] text-zinc-500">
+            <p className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
               TPHZero Copilot
             </p>
             <div>
               <h2
                 className={cn(
-                  'text-xl font-semibold tracking-tight text-zinc-100',
+                  'text-xl font-semibold tracking-tight text-foreground',
                   pathname.includes('/biopila/') && 'font-mono'
                 )}
               >
                 {meta.title}
               </h2>
-              <p className="text-sm text-zinc-400">{meta.subtitle}</p>
+              <p className="text-sm text-muted-foreground">{meta.subtitle}</p>
             </div>
           </div>
         </div>

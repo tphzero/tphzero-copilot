@@ -39,8 +39,28 @@ export function BiopilaCard({
   const dynamics = tphRemediationDynamics(biopila.measurements);
 
   return (
-    <Link href={datasetBiopilaPath(datasetId, biopila.biopilaId)}>
-      <Card className="h-full border-zinc-800 bg-zinc-900 transition-colors hover:border-zinc-700">
+    <Link
+      href={datasetBiopilaPath(datasetId, biopila.biopilaId)}
+      aria-label={`Ver detalle de biopila ${biopila.biopilaId}`}
+      className="group block h-full cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+    >
+      <Card
+        className="
+          h-full
+          border border-border
+          ring-border/90
+          bg-card
+          transition-[ring-color,background-color,transform,box-shadow]
+          duration-150
+          hover:bg-card/95
+          group-hover:-translate-y-0.5
+          group-hover:ring-emerald-500/60
+          group-hover:shadow-[0_10px_24px_-18px_rgba(52,211,153,0.55)]
+          group-focus-visible:-translate-y-0.5
+          group-focus-visible:ring-emerald-500/70
+          group-focus-visible:shadow-[0_10px_24px_-18px_rgba(52,211,153,0.55)]
+        "
+      >
         <CardHeader className="space-y-1 pb-2">
           <div className="flex flex-row items-start justify-between gap-2">
             <div className="min-w-0">
@@ -48,7 +68,7 @@ export function BiopilaCard({
                 {biopila.biopilaId}
               </CardTitle>
               {tipoUniformeEnBiopila && (
-                <p className="mt-0.5 truncate text-[10px] capitalize text-zinc-500">
+                <p className="mt-0.5 truncate text-[10px] capitalize text-muted-foreground">
                   {measurement.tipoHidrocarburo}
                 </p>
               )}
@@ -70,36 +90,36 @@ export function BiopilaCard({
 
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
-              <p className="text-zinc-500">TPH actual</p>
+              <p className="text-muted-foreground">TPH actual</p>
               <p className="font-mono font-medium">
                 {Math.round(measurement.tphActualMgkg).toLocaleString()} mg/kg
               </p>
             </div>
             <div>
-              <p className="text-zinc-500">Reducción</p>
+              <p className="text-muted-foreground">Reducción</p>
               <p className="font-mono font-medium text-emerald-400">
                 {(biopila.tphReductionPct * 100).toFixed(1)}%
               </p>
             </div>
             <div>
-              <p className="text-zinc-500">Tiempo de operación</p>
+              <p className="text-muted-foreground">Tiempo de operación</p>
               <p className="font-mono font-medium">{biopila.tiempoDias} d</p>
             </div>
             <div className="flex min-h-[56px] flex-col justify-end gap-1">
               {biopila.state !== 'optimo' && deviation ? (
                 <>
                   <div>
-                    <p className="text-zinc-500">Variable crítica</p>
-                    <p className="font-mono text-[11px] font-medium leading-tight text-zinc-200">
+                    <p className="text-muted-foreground">Variable crítica</p>
+                    <p className="font-mono text-[11px] font-medium leading-tight text-foreground">
                       {deviation.shortLabel}{' '}
                       {deviation.unit
                         ? `${deviation.value.toFixed(deviation.variableKey === 'ph' ? 2 : 1)}${deviation.unit}`
                         : deviation.value.toFixed(2)}
                     </p>
-                    <p className="text-[10px] text-zinc-500">{estadoEtiqueta(deviation.status)}</p>
+                    <p className="text-[10px] text-muted-foreground">{estadoEtiqueta(deviation.status)}</p>
                   </div>
                   <div>
-                    <p className="text-zinc-500">Tendencia TPH</p>
+                    <p className="text-muted-foreground">Tendencia TPH</p>
                     <div className="flex justify-end">
                       <TphSparkline measurements={biopila.measurements} />
                     </div>
@@ -107,7 +127,7 @@ export function BiopilaCard({
                 </>
               ) : (
                 <>
-                  <p className="text-zinc-500">Tendencia TPH</p>
+                  <p className="text-muted-foreground">Tendencia TPH</p>
                   <div className="flex justify-end">
                     <TphSparkline measurements={biopila.measurements} />
                   </div>
