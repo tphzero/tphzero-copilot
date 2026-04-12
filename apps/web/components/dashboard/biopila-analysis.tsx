@@ -85,7 +85,7 @@ export function BiopilaAnalysis({ datasetId, biopilaId }: BiopilaAnalysisProps) 
   }, [datasetId, biopilaId]);
 
   return (
-    <Card className="border-zinc-800 bg-zinc-900">
+    <Card className="border-border bg-card">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-base">Analisis del Copilot</CardTitle>
         {stored && !generating && (
@@ -93,7 +93,7 @@ export function BiopilaAnalysis({ datasetId, biopilaId }: BiopilaAnalysisProps) 
             type="button"
             variant="ghost"
             size="sm"
-            className="h-8 text-zinc-400 hover:text-zinc-100"
+            className="h-8 text-muted-foreground hover:text-foreground"
             onClick={() => void generate()}
           >
             <RefreshCw className="mr-1 h-3 w-3" />
@@ -103,7 +103,7 @@ export function BiopilaAnalysis({ datasetId, biopilaId }: BiopilaAnalysisProps) 
       </CardHeader>
       <CardContent className="space-y-3">
         {loadingStored && (
-          <div className="flex items-center gap-2 text-sm text-zinc-500">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-3 w-3 animate-spin" />
             <span>Cargando...</span>
           </div>
@@ -111,14 +111,14 @@ export function BiopilaAnalysis({ datasetId, biopilaId }: BiopilaAnalysisProps) 
 
         {!loadingStored && !stored && !generating && !error && (
           <div className="flex flex-col gap-3">
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-muted-foreground">
               Genera un analisis con IA para esta biopila: evolucion del proceso, tiempo estimado de
               remediacion, condiciones suboptimas y ajustes recomendados.
             </p>
             <Button
               type="button"
               variant="outline"
-              className="w-fit border-zinc-600"
+              className="w-fit border-border"
               onClick={() => void generate()}
             >
               <Sparkles className="mr-2 h-4 w-4" />
@@ -128,7 +128,7 @@ export function BiopilaAnalysis({ datasetId, biopilaId }: BiopilaAnalysisProps) 
         )}
 
         {generating && (
-          <div className="flex items-center gap-2 text-sm text-zinc-400">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Analizando...</span>
           </div>
