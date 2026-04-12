@@ -12,6 +12,8 @@ import { useActiveDataset } from '@/lib/context/dataset-context';
 import { useLatestDatasetId } from '@/hooks/use-latest-dataset-id';
 import { datasetDashboardPath, datasetIdFromPathname } from '@/lib/navigation/routes';
 import { cn } from '@/lib/utils';
+import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { ContrastPresetToggle } from '@/components/layout/contrast-preset-toggle';
 
 const STATIC_NAV = [
   {
@@ -44,12 +46,18 @@ export function SidebarNav() {
     datasetIdFromUrl ?? activeDataset?.id ?? latestDatasetId;
 
   return (
-    <aside className="flex h-full w-20 shrink-0 flex-col border-r border-zinc-800 bg-zinc-950/95 px-2 py-4 md:w-56 md:px-3">
+    <aside className="flex h-full w-20 shrink-0 flex-col border-r border-border bg-background/95 px-2 py-4 md:w-56 md:px-3">
       <div className="mb-8 px-2 md:px-3">
         <h1 className="font-mono text-lg font-bold tracking-tight text-emerald-400">
           TPHZero
         </h1>
-        <p className="hidden font-mono text-xs text-zinc-500 md:block">Copilot</p>
+        <p className="hidden font-mono text-xs text-muted-foreground md:block">Copilot</p>
+        <div className="mt-3">
+          <ThemeToggle />
+        </div>
+        <div className="mt-2">
+          <ContrastPresetToggle />
+        </div>
       </div>
 
       <nav className="flex flex-1 flex-col gap-1">
@@ -63,8 +71,8 @@ export function SidebarNav() {
               className={cn(
                 'flex items-center justify-center rounded-md px-3 py-2 text-sm transition-colors md:justify-start',
                 isActive
-                  ? 'bg-zinc-800 text-white'
-                  : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
               )}
             >
               <Icon className="h-4 w-4" />
@@ -79,8 +87,8 @@ export function SidebarNav() {
             className={cn(
               'flex items-center justify-center rounded-md px-3 py-2 text-sm transition-colors md:justify-start',
               pathname.startsWith(`/datasets/${dashboardTargetId}/`)
-                ? 'bg-zinc-800 text-white'
-                : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
+                ? 'bg-muted text-foreground'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             )}
           >
             <LayoutDashboard className="h-4 w-4" />
@@ -88,7 +96,7 @@ export function SidebarNav() {
           </Link>
         ) : !loading ? (
           <span
-            className="flex cursor-not-allowed items-center justify-center rounded-md px-3 py-2 text-sm text-zinc-600 md:justify-start"
+            className="flex cursor-not-allowed items-center justify-center rounded-md px-3 py-2 text-sm text-muted-foreground/60 md:justify-start"
             title="Selecciona o carga un dataset desde Carga de Datos para abrir el dashboard"
             aria-disabled
           >
@@ -96,18 +104,18 @@ export function SidebarNav() {
             <span className="hidden md:inline">Dashboard</span>
           </span>
         ) : (
-          <span className="flex items-center justify-center rounded-md px-3 py-2 text-sm text-zinc-600 md:justify-start">
+          <span className="flex items-center justify-center rounded-md px-3 py-2 text-sm text-muted-foreground/60 md:justify-start">
             <LayoutDashboard className="h-4 w-4" />
             <span className="hidden md:inline">Dashboard</span>
           </span>
         )}
       </nav>
 
-      <div className="hidden rounded-lg border border-zinc-800 bg-zinc-900/60 p-3 md:block">
-        <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">
+      <div className="hidden rounded-lg border border-border bg-card/60 p-3 md:block">
+        <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
           Estado
         </p>
-        <p className="mt-2 text-sm text-zinc-300">
+        <p className="mt-2 text-sm text-foreground/85">
           Plataforma lista para carga y análisis de datasets.
         </p>
       </div>

@@ -46,11 +46,11 @@ export function DataPreview({ dataset }: DataPreviewProps) {
   const columns = preview.length > 0 ? Object.keys(preview[0]!).slice(0, 8) : [];
 
   return (
-    <Card className="border-zinc-800 bg-zinc-900">
+    <Card className="border-border bg-card">
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle className="text-lg">{dataset.name}</CardTitle>
-          <p className="text-sm text-zinc-400">{dataset.rowCount} filas cargadas</p>
+          <p className="text-sm text-muted-foreground">{dataset.rowCount} filas cargadas</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -74,18 +74,18 @@ export function DataPreview({ dataset }: DataPreviewProps) {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-zinc-800">
+                <TableRow className="border-border">
                   {columns.map((col) => (
-                    <TableHead key={col} className="font-mono text-xs text-zinc-500">
+                    <TableHead key={col} className="font-mono text-xs text-muted-foreground">
                       {col}
                     </TableHead>
                   ))}
-                  <TableHead className="text-xs text-zinc-500">...</TableHead>
+                  <TableHead className="text-xs text-muted-foreground">...</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {preview.map((row, index) => (
-                  <TableRow key={index} className="border-zinc-800">
+                  <TableRow key={index} className="border-border">
                     {columns.map((col) => (
                       <TableCell key={col} className="font-mono text-xs">
                         {typeof row[col] === 'number'
@@ -93,17 +93,17 @@ export function DataPreview({ dataset }: DataPreviewProps) {
                           : String(row[col] ?? '')}
                       </TableCell>
                     ))}
-                    <TableCell className="text-zinc-500">...</TableCell>
+                    <TableCell className="text-muted-foreground">...</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-            <p className="mt-2 text-xs text-zinc-500">
+            <p className="mt-2 text-xs text-muted-foreground">
               Mostrando primeras 5 filas de {dataset.rowCount}
             </p>
           </div>
         ) : (
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-muted-foreground">
             El dataset se cargo correctamente. La vista previa estara disponible
             cuando existan mediciones recuperables desde la API.
           </p>
