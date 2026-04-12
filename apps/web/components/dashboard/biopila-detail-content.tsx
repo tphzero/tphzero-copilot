@@ -8,6 +8,7 @@ import { TPHTimeline } from '@/components/charts/tph-timeline';
 import { VariablesChart } from '@/components/charts/variables-chart';
 import { NavigationContextError } from '@/components/errors/navigation-context-error';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BiopilaAnalysis } from '@/components/dashboard/biopila-analysis';
 import { mapRow } from '@/lib/data/map-row';
 import {
   Table,
@@ -165,6 +166,8 @@ export function BiopilaDetailContent({
           </CardContent>
         </Card>
       </div>
+
+      <BiopilaAnalysis datasetId={datasetId} biopilaId={biopilaId} />
 
       <Card className="border-zinc-800 bg-zinc-900">
         <CardHeader>
