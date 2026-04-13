@@ -21,18 +21,28 @@ export async function GET(req: Request) {
 
   const supabase = createServerClient();
 
-  const { data: stored } = await supabase
+  const { data: stored, error: fetchError } = await supabase
     .from('biopila_analyses')
     .select('content, generated_at')
     .eq('dataset_id', datasetId)
     .eq('biopila_id', biopilaId)
     .single();
 
+  if (fetchError && fetchError.code !== 'PGRST116') {
+    // PGRST116 = no rows found, which is expected. Anything else is a real DB error.
+    console.error('[biopila/analyze GET] Error fetching stored analysis', {
+      datasetId,
+      biopilaId,
+      code: fetchError.code,
+      message: fetchError.message,
+    });
+  }
+
   if (!stored) {
     return Response.json({ analysis: null });
   }
 
-  const { data: latestMeasurement } = await supabase
+  const { data: latestMeasurement, error: measurementError } = await supabase
     .from('measurements')
     .select('created_at')
     .eq('dataset_id', datasetId)
@@ -40,6 +50,15 @@ export async function GET(req: Request) {
     .order('created_at', { ascending: false })
     .limit(1)
     .single();
+
+  if (measurementError && measurementError.code !== 'PGRST116') {
+    console.error('[biopila/analyze GET] Error fetching latest measurement for staleness check', {
+      datasetId,
+      biopilaId,
+      code: measurementError.code,
+      message: measurementError.message,
+    });
+  }
 
   const isStale = latestMeasurement
     ? new Date(latestMeasurement.created_at) > new Date(stored.generated_at)
@@ -73,12 +92,22 @@ export async function POST(req: Request) {
   const { datasetId, biopilaId } = parsed.data;
 
   const supabase = createServerClient();
-  const { data: rows } = await supabase
+  const { data: rows, error: rowsError } = await supabase
     .from('measurements')
     .select('*')
     .eq('dataset_id', datasetId)
     .eq('biopila_id', biopilaId)
     .order('tiempo_dias');
+
+  if (rowsError) {
+    console.error('[biopila/analyze POST] Error fetching measurements', {
+      datasetId,
+      biopilaId,
+      code: rowsError.code,
+      message: rowsError.message,
+    });
+    return Response.json({ error: 'Error al obtener las mediciones.' }, { status: 502 });
+  }
 
   if (!rows || rows.length === 0) {
     return Response.json({ error: 'Sin mediciones para esta biopila' }, { status: 404 });
@@ -176,6 +205,12 @@ REGLAS:
     );
 
     if (upsertError) {
+      console.error('[biopila/analyze POST] Error persisting analysis', {
+        datasetId,
+        biopilaId,
+        code: upsertError.code,
+        message: upsertError.message,
+      });
       return Response.json(
         { error: 'Analisis generado pero no se pudo guardar. Intentalo de nuevo.' },
         { status: 502 }
@@ -183,7 +218,12 @@ REGLAS:
     }
 
     return Response.json({ analysis: content, generatedAt, isStale: false });
-  } catch {
+  } catch (err) {
+    console.error('[biopila/analyze POST] Error generating analysis', {
+      datasetId,
+      biopilaId,
+      error: err instanceof Error ? err.message : String(err),
+    });
     return Response.json(
       { error: 'No se pudo generar el analisis. Intentalo de nuevo.' },
       { status: 502 }
