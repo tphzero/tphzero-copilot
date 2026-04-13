@@ -170,10 +170,17 @@ REGLAS:
     const content = text.trim();
     const generatedAt = new Date().toISOString();
 
-    await supabase.from('biopila_analyses').upsert(
+    const { error: upsertError } = await supabase.from('biopila_analyses').upsert(
       { dataset_id: datasetId, biopila_id: biopilaId, content, generated_at: generatedAt },
       { onConflict: 'dataset_id,biopila_id' }
     );
+
+    if (upsertError) {
+      return Response.json(
+        { error: 'Analisis generado pero no se pudo guardar. Intentalo de nuevo.' },
+        { status: 502 }
+      );
+    }
 
     return Response.json({ analysis: content, generatedAt, isStale: false });
   } catch {

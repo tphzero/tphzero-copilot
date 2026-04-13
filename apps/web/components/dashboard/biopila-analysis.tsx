@@ -26,6 +26,10 @@ export function BiopilaAnalysis({ datasetId, biopilaId }: BiopilaAnalysisProps) 
   useEffect(() => {
     let active = true;
 
+    setStored(null);
+    setLoadingStored(true);
+    setError(null);
+
     async function fetchStored() {
       try {
         const res = await fetch(
@@ -37,12 +41,12 @@ export function BiopilaAnalysis({ datasetId, biopilaId }: BiopilaAnalysisProps) 
           isStale?: boolean;
           error?: string;
         };
-        if (active && data.analysis) {
-          setStored({
-            analysis: data.analysis,
-            generatedAt: data.generatedAt ?? '',
-            isStale: data.isStale ?? false,
-          });
+        if (active) {
+          setStored(
+            data.analysis
+              ? { analysis: data.analysis, generatedAt: data.generatedAt ?? '', isStale: data.isStale ?? false }
+              : null
+          );
         }
       } finally {
         if (active) setLoadingStored(false);
