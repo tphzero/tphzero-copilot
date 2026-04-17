@@ -4,6 +4,8 @@ import { DefaultChatTransport } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { Bot, Send, User } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
@@ -15,16 +17,6 @@ const SUGGESTIONS = [
   'Simula aumentar la humedad a 30% en B3',
 ];
 
-function stringifyValue(value: unknown) {
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
-
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
-}
 
 function MessageBubble({
   role,
@@ -74,9 +66,11 @@ function RenderPart({ part }: { part: Record<string, unknown> }) {
   switch (partType) {
     case 'text':
       return (
-        <p className="whitespace-pre-wrap text-sm leading-6">
-          {typeof part.text === 'string' ? part.text : ''}
-        </p>
+        <div className="prose prose-sm prose-invert max-w-none text-sm leading-6 [&_p]:mb-2 [&_ul]:mb-2 [&_ol]:mb-2 [&_li]:ml-4">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {typeof part.text === 'string' ? part.text : ''}
+          </ReactMarkdown>
+        </div>
       );
 
     case 'reasoning':
@@ -91,51 +85,8 @@ function RenderPart({ part }: { part: Record<string, unknown> }) {
         </div>
       );
 
-    case 'tool-call':
-      return (
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3">
-          <p className="text-xs uppercase tracking-[0.2em] text-amber-300">
-            Tool call
-          </p>
-          <p className="mt-2 text-sm font-medium text-amber-100">
-            {typeof part.toolName === 'string' ? part.toolName : 'tool'}
-          </p>
-          {'args' in part ? (
-            <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs text-amber-50/80">
-              {stringifyValue(part.args)}
-            </pre>
-          ) : null}
-        </div>
-      );
-
-    case 'tool-result':
-      return (
-        <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-3">
-          <p className="text-xs uppercase tracking-[0.2em] text-blue-300">
-            Tool result
-          </p>
-          <p className="mt-2 text-sm font-medium text-blue-100">
-            {typeof part.toolName === 'string' ? part.toolName : 'tool'}
-          </p>
-          {'result' in part ? (
-            <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs text-blue-50/80">
-              {stringifyValue(part.result)}
-            </pre>
-          ) : null}
-        </div>
-      );
-
     default:
-      return (
-        <div className="rounded-xl border border-border bg-background/60 p-3">
-          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            {partType || 'Parte no renderizada'}
-          </p>
-          <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs text-foreground/85">
-            {stringifyValue(part)}
-          </pre>
-        </div>
-      );
+      return null;
   }
 }
 
