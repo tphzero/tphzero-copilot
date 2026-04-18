@@ -1,27 +1,12 @@
-'use client';
+import type { Metadata } from 'next';
+import { ChatPage } from '@/components/pages/chat-page';
 
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { ChatPanel } from '@/components/chat/chat-panel';
-import { useActiveDataset } from '@/lib/context/dataset-context';
+export const metadata: Metadata = {
+  title: 'Chat',
+  description:
+    'Consulta recomendaciones operativas y analiza datasets activos con el asistente de TPHZero Copilot.',
+};
 
-export default function ChatPage() {
-  const router = useRouter();
-  const { activeDataset } = useActiveDataset();
-
-  useEffect(() => {
-    if (!activeDataset) {
-      router.replace('/');
-    }
-  }, [activeDataset, router]);
-
-  if (!activeDataset) {
-    return null;
-  }
-
-  return (
-    <div className="h-full min-h-0">
-      <ChatPanel />
-    </div>
-  );
+export default function Page() {
+  return <ChatPage />;
 }

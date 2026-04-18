@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
+import { GeistSans } from 'geist/font/sans';
 import { Header } from '@/components/layout/header';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { ThemeProvider } from '@/components/providers/theme-provider';
@@ -8,8 +8,11 @@ import { DatasetProvider } from '@/lib/context/dataset-context';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'TPHZero Copilot',
-  description: 'Monitoreo inteligente de biorremediación de suelos',
+  title: {
+    default: 'TPHZero Copilot',
+    template: '%s | TPHZero Copilot',
+  },
+  description: 'Monitoreo inteligente de biorremediacion de suelos',
 };
 
 export default function RootLayout({

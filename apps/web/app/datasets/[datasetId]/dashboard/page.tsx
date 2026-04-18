@@ -1,13 +1,25 @@
-'use client';
+import type { Metadata } from 'next';
+import { DatasetDashboardPage } from '@/components/pages/dataset-dashboard-page';
 
-import { use } from 'react';
-import { DashboardPageContent } from '@/components/dashboard/dashboard-page-content';
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ datasetId: string }>;
+}): Promise<Metadata> {
+  const { datasetId } = await params;
 
-export default function DatasetDashboardPage({
+  return {
+    title: `Dashboard dataset ${datasetId.slice(0, 8)}`,
+    description:
+      'Analiza metricas, tendencias y recomendaciones operativas del dataset seleccionado en TPHZero Copilot.',
+  };
+}
+
+export default async function Page({
   params,
 }: {
   params: Promise<{ datasetId: string }>;
 }) {
-  const { datasetId } = use(params);
-  return <DashboardPageContent datasetId={datasetId} />;
+  const { datasetId } = await params;
+  return <DatasetDashboardPage datasetId={datasetId} />;
 }

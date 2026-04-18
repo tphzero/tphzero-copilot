@@ -59,3 +59,7 @@ Thumbs.db
 
 # Claude Code — local permissions / overrides (not shared)
 .claude/settings.local.json
+
+# Local runtime logs
+*.log
+.*.log
