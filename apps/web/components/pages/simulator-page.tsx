@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/select';
 
 type SimulatorValues = Record<string, number>;
+const DEFAULT_SIMULATOR_MODEL_ID = 'standard-360';
 
 const PARAM_KEYS = [
   'humedadSueloPct',
@@ -198,10 +199,11 @@ export function SimulatorPage() {
     () => getAdjustedParamKeys(values, latestMeasurement),
     [values, latestMeasurement]
   );
-  const modelMeta = getSimulatorModelById(selectedModelId) ?? getSimulatorModelById('standard-360');
+  const modelMeta =
+    getSimulatorModelById(selectedModelId) ?? getSimulatorModelById(DEFAULT_SIMULATOR_MODEL_ID);
 
   if (!modelMeta) {
-    return null;
+    throw new Error(`Simulator default model "${DEFAULT_SIMULATOR_MODEL_ID}" is not configured.`);
   }
 
   const resetValues = () => {
