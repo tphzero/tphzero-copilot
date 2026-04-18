@@ -15,6 +15,8 @@ export interface SimulatorModelMeta {
   horizonDays: number;
 }
 
+export const DEFAULT_SIMULATOR_MODEL_ID = 'standard-360';
+
 /** Texto de ecuacion compartido; unidades y simbolos en LaTeX. */
 const KINETICS_CAPTION =
   '**Linea base:** el coeficiente $k$ con unidades $\\mathrm{d}^{-1}$ se ajusta por regresion sobre ' +
@@ -92,8 +94,7 @@ export function resolveSimulationModelFromOptions(options?: {
 
   if (explicitModelId) {
     const meta = getSimulatorModelById(explicitModelId);
-    const normalizedId =
-      meta != null ? explicitModelId : 'standard-360';
+    const normalizedId = meta != null ? explicitModelId : DEFAULT_SIMULATOR_MODEL_ID;
     const metaResolved = getSimulatorModelById(normalizedId)!;
     const defaultHorizon = metaResolved.horizonDays;
     const horizon = explicitHorizon ?? defaultHorizon;
@@ -116,8 +117,8 @@ export function resolveSimulationModelFromOptions(options?: {
   }
 
   return {
-    modelId: 'standard-360',
-    horizonDays: resolveSimulatorHorizonDays('standard-360'),
+    modelId: DEFAULT_SIMULATOR_MODEL_ID,
+    horizonDays: resolveSimulatorHorizonDays(DEFAULT_SIMULATOR_MODEL_ID),
   };
 }
 
@@ -135,8 +136,8 @@ export function recommendSimulatorModel(
 ): { modelId: string; reason: string } {
   const sorted = [...measurements].sort((a, b) => a.tiempoDias - b.tiempoDias);
   if (sorted.length < 2) {
-    return {
-      modelId: 'standard-360',
+      return {
+      modelId: DEFAULT_SIMULATOR_MODEL_ID,
       reason:
         'Menos de dos mediciones: se usa el horizonte estandar ($H = 360~\\mathrm{d}$ extra) por defecto.',
     };
@@ -162,7 +163,7 @@ export function recommendSimulatorModel(
   }
 
   return {
-    modelId: 'standard-360',
+    modelId: DEFAULT_SIMULATOR_MODEL_ID,
     reason: 'Historial adecuado para el horizonte de prediccion estandar ($H = 360~\\mathrm{d}$ extra).',
   };
 }

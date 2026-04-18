@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { mapRow } from '@/lib/data/map-row';
 import { useActiveDataset } from '@/lib/context/dataset-context';
 import {
+  DEFAULT_SIMULATOR_MODEL_ID,
   getSimulatorModelById,
   recommendSimulatorModel,
   SIMULATOR_MODELS_SELECTABLE,
@@ -30,7 +31,6 @@ import {
 } from '@/components/ui/select';
 
 type SimulatorValues = Record<string, number>;
-const DEFAULT_SIMULATOR_MODEL_ID = 'standard-360';
 
 const PARAM_KEYS = [
   'humedadSueloPct',
