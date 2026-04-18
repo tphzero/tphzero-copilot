@@ -18,7 +18,6 @@ import { useActiveDataset } from '@/lib/context/dataset-context';
 import {
   getSimulatorModelById,
   recommendSimulatorModel,
-  SIMULATOR_MODELS,
   SIMULATOR_MODELS_SELECTABLE,
 } from '@/lib/models/simulator-models';
 import { simulateScenario } from '@/lib/models/simulator';
@@ -179,14 +178,11 @@ export function SimulatorPage() {
   }, [selectedBiopila, selectedMeasurements]);
 
   useEffect(() => {
-    const scoped = allMeasurements
-      .filter((measurement) => measurement.biopilaId === selectedBiopila)
-      .sort((a, b) => a.tiempoDias - b.tiempoDias);
-    if (scoped.length < 2) {
+    if (selectedMeasurements.length < 2) {
       return;
     }
-    setSelectedModelId(recommendSimulatorModel(scoped).modelId);
-  }, [selectedBiopila, activeDataset?.id, allMeasurements]);
+    setSelectedModelId(recommendSimulatorModel(selectedMeasurements).modelId);
+  }, [selectedMeasurements]);
 
   const result = useMemo(() => {
     if (selectedMeasurements.length < 2) return null;
@@ -202,7 +198,11 @@ export function SimulatorPage() {
     () => getAdjustedParamKeys(values, latestMeasurement),
     [values, latestMeasurement]
   );
-  const modelMeta = getSimulatorModelById(selectedModelId) ?? SIMULATOR_MODELS[1]!;
+  const modelMeta = getSimulatorModelById(selectedModelId) ?? getSimulatorModelById('standard-360');
+
+  if (!modelMeta) {
+    return null;
+  }
 
   const resetValues = () => {
     if (!latestMeasurement) return;
